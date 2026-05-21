@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0107)file:///Users/yangzonghan/Downloads/%E5%AE%89%E8%A1%9B%E7%BC%BA%E5%A4%B1%E8%B3%87%E6%96%99%E5%BA%AB_29.html -->
+<!-- saved from url=(0107)file:///Users/yangzonghan/Downloads/%E5%AE%89%E8%A1%9B%E7%BC%BA%E5%A4%B1%E8%B3%87%E6%96%99%E5%BA%AB_30.html -->
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -1529,14 +1529,16 @@ window.saveUser = async function(uid) {
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-// 處理 redirect 回來的結果
-getRedirectResult(auth).then(result => {
-  if(result && result.user) {
-    console.log('redirect login success:', result.user.email);
-  }
-}).catch(e => {
-  console.error('getRedirectResult error:', e.code, e.message);
-});
+// 處理 redirect 回來的結果（安全版，不影響頁面）
+try {
+  getRedirectResult(auth).then(result => {
+    if(result && result.user) console.log('redirect ok:', result.user.email);
+  }).catch(e => {
+    console.log('getRedirectResult ignored:', e.code);
+  });
+} catch(e) {
+  console.log('getRedirectResult not supported:', e.message);
+}
 
 window.loginWithGoogle = async function() {
   try {
