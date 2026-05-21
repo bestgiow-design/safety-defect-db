@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0107)file:///Users/yangzonghan/Downloads/%E5%AE%89%E8%A1%9B%E7%BC%BA%E5%A4%B1%E8%B3%87%E6%96%99%E5%BA%AB_30.html -->
+<!-- saved from url=(0107)file:///Users/yangzonghan/Downloads/%E5%AE%89%E8%A1%9B%E7%BC%BA%E5%A4%B1%E8%B3%87%E6%96%99%E5%BA%AB_31.html -->
 <html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -1010,7 +1010,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,serverTimestamp,updateDoc,setDoc,getDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut,onAuthStateChanged,browserLocalPersistence,setPersistence}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 const app=initializeApp({apiKey:"AIzaSyCOTu_Qgm3OEqMJeCM-O1jlQiGT0tH9LSo",authDomain:"safety-defect-db.firebaseapp.com",projectId:"safety-defect-db",storageBucket:"safety-defect-db.firebasestorage.app",messagingSenderId:"1046696882718",appId:"1:1046696882718:web:e7d1b4c994f15d19c0740f"});
 const db=getFirestore(app);
@@ -1529,32 +1529,21 @@ window.saveUser = async function(uid) {
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
 
-// 處理 redirect 回來的結果（安全版，不影響頁面）
-try {
-  getRedirectResult(auth).then(result => {
-    if(result && result.user) console.log('redirect ok:', result.user.email);
-  }).catch(e => {
-    console.log('getRedirectResult ignored:', e.code);
-  });
-} catch(e) {
-  console.log('getRedirectResult not supported:', e.message);
-}
+// 設定 persistence 為 local（解決 iOS sessionStorage 問題）
+setPersistence(auth, browserLocalPersistence).catch(()=>{});
+
+// 處理 redirect 回來的結果
+getRedirectResult(auth).then(result => {
+  if(result && result.user) console.log('redirect ok:', result.user.email);
+}).catch(e => {
+  console.log('getRedirectResult ignored:', e.code);
+});
 
 window.loginWithGoogle = async function() {
   try {
-    // 先嘗試 popup（所有裝置）
-    await signInWithPopup(auth, provider);
+    await signInWithRedirect(auth, provider);
   } catch(e) {
-    // popup 被擋才改用 redirect
-    if(e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
-      try {
-        await signInWithRedirect(auth, provider);
-      } catch(e2) {
-        alert('登入失敗：' + e2.message);
-      }
-    } else {
-      alert('登入失敗：' + e.message);
-    }
+    alert('登入失敗：' + e.message);
   }
 };
 
