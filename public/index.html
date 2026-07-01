@@ -267,10 +267,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
       <div class="two-col">
         <div class="fl"><label>作業類型</label>
           <select id="f_cat">
-            <option>一、環境保護</option><option>二、個人防護具及管理</option><option>三、火災防護</option>
-            <option>四、墜落</option><option>五、感電</option><option>六、物體倒/崩塌</option>
-            <option>七、吊掛作業/物體飛落</option><option>八、物料、機具管理</option>
-            <option>九、交通安全及維持</option><option>十、安全衛生管理</option><option>十一、局限空間</option>
+<option value="一、環境保護">1. 環境保護</option><option value="二、個人防護具及管理">2. 個人防護具及管理</option><option value="三、火災防護">3. 火災防護</option><option value="四、墜落">4. 墜落</option><option value="五、感電">5. 感電</option><option value="六、物體倒/崩塌">6. 物體倒/崩塌</option><option value="七、吊掛作業/物體飛落">7. 吊掛作業/物體飛落</option><option value="八、物料、機具管理">8. 物料、機具管理</option><option value="九、交通安全及維持">9. 交通安全及維持</option><option value="十、安全衛生管理">10. 安全衛生管理</option><option value="十一、局限空間">11. 局限空間</option>
           </select>
         </div>
         <div class="fl"><label>嚴重等級</label>
@@ -339,10 +336,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
       <div class="two-col">
         <div class="fl"><label>作業類型</label>
           <select id="e_cat">
-            <option>一、環境保護</option><option>二、個人防護具及管理</option><option>三、火災防護</option>
-            <option>四、墜落</option><option>五、感電</option><option>六、物體倒/崩塌</option>
-            <option>七、吊掛作業/物體飛落</option><option>八、物料、機具管理</option>
-            <option>九、交通安全及維持</option><option>十、安全衛生管理</option><option>十一、局限空間</option>
+<option value="一、環境保護">1. 環境保護</option><option value="二、個人防護具及管理">2. 個人防護具及管理</option><option value="三、火災防護">3. 火災防護</option><option value="四、墜落">4. 墜落</option><option value="五、感電">5. 感電</option><option value="六、物體倒/崩塌">6. 物體倒/崩塌</option><option value="七、吊掛作業/物體飛落">7. 吊掛作業/物體飛落</option><option value="八、物料、機具管理">8. 物料、機具管理</option><option value="九、交通安全及維持">9. 交通安全及維持</option><option value="十、安全衛生管理">10. 安全衛生管理</option><option value="十一、局限空間">11. 局限空間</option>
           </select>
         </div>
         <div class="fl"><label>嚴重等級</label>
@@ -418,7 +412,7 @@ const db=getFirestore(app);
 const auth=getAuth(app);
 const storage=getStorage(app);
 // ── App 版本 & 一鍵更新（解決 iOS 主畫面 App 快取舊版問題）──
-const APP_VERSION='3';  // 每次部署改版時，把這個數字 +1
+const APP_VERSION='5';  // 每次部署改版時，把這個數字 +1
 window.forceUpdate=async function(){
   try{
     // 1. 清掉所有 Cache Storage（PWA 快取）
@@ -471,7 +465,7 @@ window.exportExcel=async function(){
     ws.getRow(1).font={bold:true};ws.getRow(1).alignment={vertical:'middle',horizontal:'center'};
     for(let i=0;i<rows.length;i++){
       const r=rows[i];
-      const row=ws.addRow({no:i+1,project:r.project||'',date:r.date||'',cat:r.cat||'',sev:r.sev||'',title:r.title||r.desc||'',law:lawText(r),location:r.location||''});
+      const row=ws.addRow({no:i+1,project:r.project||'',date:r.date||'',cat:catDisplay(r.cat),sev:r.sev||'',title:r.title||r.desc||'',law:lawText(r),location:r.location||''});
       row.alignment={vertical:'top',wrapText:true};
       // 嵌照片
       const ph=(typeof photoList==='function')?photoList(r):[];
@@ -505,7 +499,7 @@ window.exportPDF=async function(){
   const trs=rows.map((r,i)=>`<tr>
     <td class="c">${i+1}</td>
     <td>${esc(r.project)}<br><span class="sub">${esc(r.date)}</span></td>
-    <td>${esc(r.cat)}<br><span class="sub">${esc(r.sev)}</span></td>
+    <td>${esc(catDisplay(r.cat))}<br><span class="sub">${esc(r.sev)}</span></td>
     <td>${esc(r.title||r.desc)}<br><span class="sub">${esc(lawText(r))}</span></td>
     <td class="c">${imgs[i]?`<img src="${imgs[i]}">`:'<span class="sub">無照片</span>'}</td>
   </tr>`).join('');
@@ -551,6 +545,21 @@ let currentUser=null,isAdmin=false,userRole=null,userProjects=[];
 let records=[],projects={},activeCat='全部',lawFilter='all',selSev='立即危險',editSev='一般缺失',detailId=null,editPhotoB64=null,editPhotoRot=0,editExistingPhotos=[],editNewPhotos=[];
 
 const CATS=['全部','一、環境保護','二、個人防護具及管理','三、火災防護','四、墜落','五、感電','六、物體倒/崩塌','七、吊掛作業/物體飛落','八、物料、機具管理','九、交通安全及維持','十、安全衛生管理','十一、局限空間'];
+// 顯示用：把類別開頭的中文編號（一、二…十一、）轉成阿拉伯數字「1. 」。資料庫仍存中文編號，僅顯示改變。
+const CN_NUM={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12};
+function catDisplay(cat){
+  if(!cat)return '';
+  if(cat==='全部')return '全部';
+  const m=cat.match(/^(十一|十二|十|[一二三四五六七八九])、(.+)$/);
+  if(m){const n=CN_NUM[m[1]];if(n)return n+'. '+m[2];}
+  return cat;
+}
+// 顯示用：完全去掉編號，只留類別名稱（用於個別缺失卡片）
+function catNoNum(cat){
+  if(!cat||cat==='全部')return cat||'';
+  const m=cat.match(/^(十一|十二|十|[一二三四五六七八九])、(.+)$/);
+  return m?m[2]:cat;
+}
 const SEV_DOT={'立即危險':'#E24B4A','一般缺失':'#BA7517'};
 const SEV_CLS={'立即危險':'badge-d','一般缺失':'badge-m'};
 const LAWS=[
@@ -565,7 +574,7 @@ const LAWS=[
 function lawOptsHTML(){return'<option value="">選擇法規</option>'+LAWS.map(l=>`<option value="${l.v}">${l.t}</option>`).join('');}
 
 // ── 分類 ──
-function buildCats(){document.getElementById('catScroll').innerHTML=CATS.map(c=>`<button class="chip${c===activeCat?' active':''}" data-cat="${c}" onclick="setCat('${c}')">${c}</button>`).join('');}
+function buildCats(){document.getElementById('catScroll').innerHTML=CATS.map(c=>`<button class="chip${c===activeCat?' active':''}" data-cat="${c}" onclick="setCat('${c}')">${catDisplay(c)}</button>`).join('');}
 window.setCat=function(c){activeCat=c;buildCats();render();};
 // 判斷一筆缺失有無法規依據
 window.hasLawDep=function(r){return (Array.isArray(r.laws)&&r.laws.length>0&&r.laws.some(l=>l&&(l.name||l.no)))||(!!r.law&&String(r.law).trim()!=='');};
@@ -640,7 +649,7 @@ let f=baseRecords.filter(r=>{
   document.getElementById('cardList').innerHTML=f.map(r=>{const CAT_BG={'一、環境保護':'#e8f5e9','二、個人防護具及管理':'#e3f2fd','三、火災防護':'#fce4ec','四、墜落':'#fff3e0','五、感電':'#fffde7','六、物體倒/崩塌':'#efebe9','七、吊掛作業/物體飛落':'#f3e5f5','八、物料、機具管理':'#e8eaf6','九、交通安全及維持':'#e0f7fa','十、安全衛生管理':'#e8eaf6','十一、局限空間':'#ede7f6'};const bg=CAT_BG[r.cat]||'';return `<div class="card" style="background:${bg}" onclick="openDetail('${r.id}')">
     <div class="sev-dot" style="background:${SEV_DOT[r.sev]||'#999'}"></div>
     <div class="card-info">
-      <div class="card-badges"><span class="badge badge-cat">${r.cat||''}</span><span class="badge ${SEV_CLS[r.sev]||''}">${r.sev||''}</span>${r.repeat?'<span class="badge badge-rep">重複性</span>':''}</div>
+      <div class="card-badges"><span class="badge badge-cat">${catNoNum(r.cat)}</span><span class="badge ${SEV_CLS[r.sev]||''}">${r.sev||''}</span>${r.repeat?'<span class="badge badge-rep">重複性</span>':''}</div>
       <div class="card-title">${r.title||''}</div>
       <div class="card-desc">${r.desc||''}</div>
       ${lawStr(r)?`<div class="card-law">${lawStr(r)}</div>`:''}
@@ -888,7 +897,7 @@ window.openDetail=function(id){
   const r=records.find(x=>x.id===id);if(!r)return;detailId=id;
   document.getElementById('d_title').textContent=r.title||'';
   document.getElementById('d_desc').textContent=r.desc||'—';
-  document.getElementById('d_badges').innerHTML=`<span class="badge badge-cat">${r.cat||''}</span><span class="badge ${SEV_CLS[r.sev]||''}">${r.sev||''}</span>${r.repeat?'<span class="badge badge-rep">重複性缺失</span>':''}`;
+  document.getElementById('d_badges').innerHTML=`<span class="badge badge-cat">${catNoNum(r.cat)}</span><span class="badge ${SEV_CLS[r.sev]||''}">${r.sev||''}</span>${r.repeat?'<span class="badge badge-rep">重複性缺失</span>':''}`;
   const pi=[r.project,r.location,r.date].filter(Boolean).join(' ／ ');
   if(pi){document.getElementById('d_proj').textContent=pi;document.getElementById('d_projWrap').style.display='block';}
   else document.getElementById('d_projWrap').style.display='none';
