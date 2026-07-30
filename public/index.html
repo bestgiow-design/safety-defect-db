@@ -202,6 +202,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
   </select>
   <button class="chip" onclick="exportExcel()" style="height:36px;border-radius:10px;background:#1a7a3c;color:#fff;border-color:#1a7a3c">📊 匯出Excel</button>
   <button class="chip" onclick="exportPDF()" style="height:36px;border-radius:10px;background:#c0392b;color:#fff;border-color:#c0392b">🖨️ 匯出PDF</button>
+  <button class="chip" onclick="openCoverage()" style="height:36px;border-radius:10px;background:#6c4bb6;color:#fff;border-color:#6c4bb6">📅 督導覆蓋率</button>
   <button class="btn-clear" onclick="clearFilters()" id="clearFilterBtn" style="display:none">✕ 清除</button>
 </div>
 
@@ -412,7 +413,7 @@ const db=getFirestore(app);
 const auth=getAuth(app);
 const storage=getStorage(app);
 // ── App 版本 & 一鍵更新（解決 iOS 主畫面 App 快取舊版問題）──
-const APP_VERSION='5';  // 每次部署改版時，把這個數字 +1
+const APP_VERSION='6';  // 每次部署改版時，把這個數字 +1
 window.forceUpdate=async function(){
   try{
     // 1. 清掉所有 Cache Storage（PWA 快取）
@@ -526,6 +527,173 @@ window.exportPDF=async function(){
   w.document.write(html);w.document.close();
   toast(`已產生 ${rows.length} 筆列印畫面`);
 };
+
+// ══════════ 督導覆蓋率 ══════════
+// 案件基本資料存於 Firestore 'projects'：{ name, startDate, endDate }
+let projectMeta = {}; // name -> {startDate,endDate}
+async function loadProjectMeta(){
+  try{
+    const snap = await getDocs(collection(db,'projects'));
+    projectMeta = {};
+    snap.docs.forEach(d=>{ const x=d.data(); if(x.name) projectMeta[x.name]={id:d.id,startDate:x.startDate||'',endDate:x.endDate||''}; });
+  }catch(e){ projectMeta={}; }
+}
+// 取得資料庫中所有實際案名（從 records）
+function allProjectNames(){
+  const set=new Set();
+  (records||[]).forEach(r=>{ if(r.project) set.add(r.project); });
+  return [...set].sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+}
+// 產生 yyyy-mm 月份序列
+function monthRange(startYM,endYM){
+  const out=[]; if(!startYM||!endYM) return out;
+  let [y,m]=startYM.split('-').map(Number); const [ey,em]=endYM.split('-').map(Number);
+  while(y<ey||(y===ey&&m<=em)){ out.push(`${y}-${String(m).padStart(2,'0')}`); m++; if(m>12){m=1;y++;} if(out.length>200)break; }
+  return out;
+}
+function ymOf(dateStr){ return dateStr?dateStr.slice(0,7):''; }
+function thisYM(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+
+// 計算某案的督導月份集合（實際有紀錄的月）
+function supervisedMonths(projName){
+  const s=new Set();
+  (records||[]).forEach(r=>{ if(r.project===projName && r.date) s.add(ymOf(r.date)); });
+  return s;
+}
+
+window.openCoverage = async function(){
+  document.getElementById('coverageSheet').style.display='flex';
+  const body=document.getElementById('coverageBody');
+  body.innerHTML='<div style="text-align:center;color:#999;padding:30px">載入中…</div>';
+  await loadProjectMeta();
+  renderCoverage();
+};
+function renderCoverage(){
+  const body=document.getElementById('coverageBody');
+  const names=allProjectNames();
+  if(!names.length){ body.innerHTML='<div style="text-align:center;color:#999;padding:30px">目前沒有任何案件資料</div>'; return; }
+  // 找出全部要顯示的月份範圍（所有案的最小開工月～最大結束月）
+  let allMonths=new Set();
+  const rows=names.map(name=>{
+    const meta=projectMeta[name]||{};
+    const supd=supervisedMonths(name);
+    // 開工月：優先 meta.startDate，否則用該案最早紀錄月
+    let startYM=ymOf(meta.startDate);
+    if(!startYM){ const ds=[...supd].sort(); startYM=ds[0]||''; }
+    // 結束月：有完工日→完工月；否則→本月（施工中）
+    let endYM=ymOf(meta.endDate)|| (startYM?thisYM():'');
+    const months=monthRange(startYM,endYM);
+    months.forEach(m=>allMonths.add(m));
+    const ongoing=!meta.endDate;
+    return {name,meta,supd,startYM,endYM,months,ongoing};
+  });
+  const monthList=[...allMonths].sort();
+  window._coverageData={rows,monthList}; // 供匯出用
+
+  // 建表格
+  let html='<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;white-space:nowrap">';
+  html+='<thead><tr><th style="position:sticky;left:0;background:var(--bg2);border:1px solid var(--border);padding:6px 10px;text-align:left;z-index:1">案名</th>';
+  html+='<th style="border:1px solid var(--border);padding:6px 8px">狀態</th>';
+  monthList.forEach(m=>{ html+=`<th style="border:1px solid var(--border);padding:6px 8px">${m.replace('-','/')}</th>`; });
+  html+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    const c=projColor(r.name);
+    html+=`<tr><td style="position:sticky;left:0;background:var(--bg);border:1px solid var(--border);padding:6px 10px;font-weight:600"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${c.dot}"></span>${r.name}</span></td>`;
+    html+=`<td style="border:1px solid var(--border);padding:6px 8px;text-align:center">${r.ongoing?'<span style="color:#1a7a3c">施工中</span>':'<span style="color:#888">已完工</span>'}</td>`;
+    const monthSet=new Set(r.months);
+    let miss=0;
+    monthList.forEach(m=>{
+      if(!monthSet.has(m)){ html+='<td style="border:1px solid var(--border);padding:6px 8px;text-align:center;background:#f0f0f0;color:#ccc">–</td>'; }
+      else if(r.supd.has(m)){ html+='<td style="border:1px solid var(--border);padding:6px 8px;text-align:center;background:#e6f4ea;color:#1a7a3c">✓</td>'; }
+      else { html+='<td style="border:1px solid var(--border);padding:6px 8px;text-align:center;background:#fdecea;color:#c0392b;font-weight:700">⚠</td>'; miss++; }
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  // 圖例 + 漏報統計
+  const totalMiss=rows.reduce((s,r)=>s+r.months.filter(m=>!r.supd.has(m)).length,0);
+  html='<div style="margin-bottom:12px;font-size:13px"><span style="background:#e6f4ea;color:#1a7a3c;padding:2px 8px;border-radius:4px">✓ 有督導</span> <span style="background:#fdecea;color:#c0392b;padding:2px 8px;border-radius:4px">⚠ 漏報</span> <span style="background:#f0f0f0;color:#999;padding:2px 8px;border-radius:4px">– 非施工期</span>'
+    +(totalMiss>0?` <b style="color:#c0392b;margin-left:8px">共 ${totalMiss} 個月漏報</b>`:' <b style="color:#1a7a3c;margin-left:8px">✅ 無漏報</b>')+'</div>'
+    +'<div style="margin-bottom:12px"><button onclick="openProjectMeta()" style="padding:8px 14px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">⚙️ 設定各案開工/完工日</button> <button onclick="exportCoverage()" style="padding:8px 14px;background:#1a7a3c;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">📊 匯出Excel</button></div>'
+    +html;
+  body.innerHTML=html;
+}
+
+// 設定各案開工/完工日
+window.openProjectMeta = function(){
+  const names=allProjectNames();
+  const body=document.getElementById('coverageBody');
+  let html='<div style="margin-bottom:12px"><button onclick="renderCoverage()" style="padding:8px 14px;background:var(--text2);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">← 返回覆蓋率表</button></div>';
+  html+='<div style="font-size:13px;color:#666;margin-bottom:12px">填寫各案開工日與完工日。完工日留空＝施工中（算到本月）。</div>';
+  names.forEach((name,i)=>{
+    const meta=projectMeta[name]||{};
+    const c=projColor(name);
+    html+=`<div style="padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+      <div style="font-weight:600;margin-bottom:8px"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:${c.dot}"></span>${name}</span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <label style="font-size:13px">開工日 <input type="date" id="pm_start_${i}" value="${meta.startDate||''}" style="padding:4px;border:1px solid var(--border2);border-radius:6px"></label>
+        <label style="font-size:13px">完工日 <input type="date" id="pm_end_${i}" value="${meta.endDate||''}" style="padding:4px;border:1px solid var(--border2);border-radius:6px"></label>
+        <button onclick="saveProjectMeta(${i},'${name.replace(/'/g,"\\'")}')" style="padding:6px 12px;background:var(--blue);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">儲存</button>
+        <span id="pm_msg_${i}" style="font-size:12px;color:#1a7a3c"></span>
+      </div>
+    </div>`;
+  });
+  body.innerHTML=html;
+};
+window.saveProjectMeta = async function(i,name){
+  const start=document.getElementById('pm_start_'+i).value;
+  const end=document.getElementById('pm_end_'+i).value;
+  const msg=document.getElementById('pm_msg_'+i);
+  try{
+    const existing=projectMeta[name];
+    if(existing&&existing.id){ await updateDoc(doc(db,'projects',existing.id),{name,startDate:start,endDate:end}); }
+    else { const ref=await addDoc(collection(db,'projects'),{name,startDate:start,endDate:end}); projectMeta[name]={id:ref.id,startDate:start,endDate:end}; }
+    projectMeta[name]={...(projectMeta[name]||{}),startDate:start,endDate:end};
+    msg.textContent='✓ 已儲存';
+    setTimeout(()=>msg.textContent='',2000);
+  }catch(e){ msg.style.color='#c0392b'; msg.textContent='儲存失敗：'+e.message; }
+};
+
+// 匯出覆蓋率 Excel
+window.exportCoverage = async function(){
+  const data=window._coverageData;
+  if(!data||!data.rows.length){toast('沒有可匯出的資料');return;}
+  toast('產生 Excel 中…');
+  try{
+    if(!window.ExcelJS){ await import('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js'); }
+    const wb=new window.ExcelJS.Workbook();
+    const ws=wb.addWorksheet('督導覆蓋率');
+    const header=['案名','狀態',...data.monthList.map(m=>m.replace('-','/'))];
+    ws.addRow(header); ws.getRow(1).font={bold:true};
+    data.rows.forEach(r=>{
+      const monthSet=new Set(r.months);
+      const cells=[r.name, r.ongoing?'施工中':'已完工'];
+      data.monthList.forEach(m=>{
+        if(!monthSet.has(m))cells.push('–');
+        else if(r.supd.has(m))cells.push('✓');
+        else cells.push('漏');
+      });
+      const row=ws.addRow(cells);
+      // 上色
+      data.monthList.forEach((m,idx)=>{
+        const cell=row.getCell(idx+3);
+        if(!monthSet.has(m))cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF0F0F0'}};
+        else if(r.supd.has(m))cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE6F4EA'}};
+        else {cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFDECEA'}};cell.font={bold:true,color:{argb:'FFC0392B'}};}
+        cell.alignment={horizontal:'center'};
+      });
+    });
+    ws.getColumn(1).width=24; ws.getColumn(2).width=8;
+    for(let i=3;i<=header.length;i++)ws.getColumn(i).width=8;
+    const buf=await wb.xlsx.writeBuffer();
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=`督導覆蓋率_${new Date().toISOString().slice(0,10)}.xlsx`;a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast('已匯出督導覆蓋率');
+  }catch(e){ toast('匯出失敗：'+e.message); }
+};
+
 // 取得一筆缺失的照片清單：優先用 photoUrls（Storage 網址，輕量），沒有才退回 base64
 function photoList(r){
   if(Array.isArray(r.photoUrls)&&r.photoUrls.length>0)return r.photoUrls;
@@ -1321,6 +1489,20 @@ onAuthStateChanged(auth, async user => {
       <button class="sheet-close" onclick="document.getElementById(&#39;adminSheet&#39;).style.display=&#39;none&#39;">✕</button>
     </div>
     <div class="sheet-body" id="adminBody">
+      <div style="text-align:center;color:#999;padding:20px">載入中...</div>
+    </div>
+  </div>
+</div>
+
+<!-- 督導覆蓋率 -->
+<div class="overlay" id="coverageSheet" onclick="if(event.target===this)this.style.display=&#39;none&#39;" style="display:none">
+  <div class="sheet" onclick="event.stopPropagation()" style="max-height:90vh;max-width:95vw;width:auto">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2 style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">📅</span> 督導覆蓋率</h2>
+      <button class="sheet-close" onclick="document.getElementById(&#39;coverageSheet&#39;).style.display=&#39;none&#39;">✕</button>
+    </div>
+    <div class="sheet-body" id="coverageBody">
       <div style="text-align:center;color:#999;padding:20px">載入中...</div>
     </div>
   </div>
