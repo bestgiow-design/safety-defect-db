@@ -413,7 +413,7 @@ const db=getFirestore(app);
 const auth=getAuth(app);
 const storage=getStorage(app);
 // ── App 版本 & 一鍵更新（解決 iOS 主畫面 App 快取舊版問題）──
-const APP_VERSION='6';  // 每次部署改版時，把這個數字 +1
+const APP_VERSION='7';  // 每次部署改版時，把這個數字 +1
 window.forceUpdate=async function(){
   try{
     // 1. 清掉所有 Cache Storage（PWA 快取）
@@ -563,11 +563,47 @@ function supervisedMonths(projName){
 
 window.openCoverage = async function(){
   document.getElementById('coverageSheet').style.display='flex';
+  // 每次打開回到置中（清掉上次拖曳的位置）
+  const win=document.getElementById('coverageWin');
+  win.style.left=''; win.style.top=''; win.style.position='relative';
+  initCoverageDrag();
   const body=document.getElementById('coverageBody');
   body.innerHTML='<div style="text-align:center;color:#999;padding:30px">載入中…</div>';
   await loadProjectMeta();
   renderCoverage();
 };
+// 拖曳：按住標題列可移動視窗
+let _covDragInit=false;
+function initCoverageDrag(){
+  if(_covDragInit)return; _covDragInit=true;
+  const win=document.getElementById('coverageWin');
+  const bar=document.getElementById('coverageDrag');
+  let dragging=false,sx=0,sy=0,ox=0,oy=0;
+  const start=(x,y)=>{
+    dragging=true;
+    const r=win.getBoundingClientRect();
+    // 切成 fixed 定位，用目前螢幕座標接手，避免跳動
+    win.style.position='fixed'; win.style.margin='0';
+    win.style.left=r.left+'px'; win.style.top=r.top+'px';
+    sx=x; sy=y; ox=r.left; oy=r.top;
+    document.body.style.userSelect='none';
+  };
+  const move=(x,y)=>{
+    if(!dragging)return;
+    let nl=ox+(x-sx), nt=oy+(y-sy);
+    // 邊界保護：不要拖出畫面
+    nl=Math.max(-win.offsetWidth+80,Math.min(nl,window.innerWidth-80));
+    nt=Math.max(0,Math.min(nt,window.innerHeight-50));
+    win.style.left=nl+'px'; win.style.top=nt+'px';
+  };
+  const end=()=>{ dragging=false; document.body.style.userSelect=''; };
+  bar.addEventListener('mousedown',e=>{ if(e.target.closest('.sheet-close'))return; start(e.clientX,e.clientY); });
+  window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  window.addEventListener('mouseup',end);
+  bar.addEventListener('touchstart',e=>{ if(e.target.closest('.sheet-close'))return; const t=e.touches[0]; start(t.clientX,t.clientY); },{passive:true});
+  window.addEventListener('touchmove',e=>{ if(dragging){const t=e.touches[0]; move(t.clientX,t.clientY);} },{passive:true});
+  window.addEventListener('touchend',end);
+}
 function renderCoverage(){
   const body=document.getElementById('coverageBody');
   const names=allProjectNames();
@@ -1495,14 +1531,13 @@ onAuthStateChanged(auth, async user => {
 </div>
 
 <!-- 督導覆蓋率 -->
-<div class="overlay" id="coverageSheet" onclick="if(event.target===this)this.style.display=&#39;none&#39;" style="display:none">
-  <div class="sheet" onclick="event.stopPropagation()" style="max-height:90vh;max-width:95vw;width:auto">
-    <div class="sheet-handle"></div>
-    <div class="sheet-head">
-      <h2 style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">📅</span> 督導覆蓋率</h2>
-      <button class="sheet-close" onclick="document.getElementById(&#39;coverageSheet&#39;).style.display=&#39;none&#39;">✕</button>
+<div class="overlay" id="coverageSheet" onclick="if(event.target===this)this.style.display=&#39;none&#39;" style="display:none;align-items:center;justify-content:center">
+  <div id="coverageWin" onclick="event.stopPropagation()" style="background:var(--bg);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.35);max-height:88vh;max-width:92vw;width:auto;display:flex;flex-direction:column;position:relative">
+    <div id="coverageDrag" style="cursor:move;user-select:none;padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;background:var(--bg2)">
+      <h2 style="display:flex;align-items:center;gap:8px;margin:0;font-size:18px"><span style="font-size:20px">📅</span> 督導覆蓋率 <span style="font-size:11px;color:var(--text3);font-weight:400">（按住此列可拖曳）</span></h2>
+      <button class="sheet-close" onclick="document.getElementById(&#39;coverageSheet&#39;).style.display=&#39;none&#39;" style="position:static">✕</button>
     </div>
-    <div class="sheet-body" id="coverageBody">
+    <div class="sheet-body" id="coverageBody" style="overflow:auto;padding:16px">
       <div style="text-align:center;color:#999;padding:20px">載入中...</div>
     </div>
   </div>
