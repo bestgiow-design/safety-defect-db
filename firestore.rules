@@ -1,17 +1,44 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /defects/{id} {
-      allow read, write: if request.auth != null;
+
+    function signedIn() { return request.auth != null; }
+
+    // 總管理員用 email 寫死，確保 users 文件被動過也不會把自己鎖在外面
+    function ownerEmail() {
+      return signedIn() && request.auth.token.email == 'bestgiow@gmail.com';
     }
-    match /projects/{id} {
-      allow read, write: if request.auth != null;
+    function hasUserDoc() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin()  { return ownerEmail() || (hasUserDoc() && myRole() == 'admin'); }
+    function approved() { return ownerEmail() || (hasUserDoc() && myRole() in ['admin','staff','vendor']); }
+    function canEdit()  { return ownerEmail() || (hasUserDoc() && myRole() in ['admin','staff']); }
+
     match /users/{uid} {
-      // 本人可讀寫自己的文件（新使用者建立自己的記錄）
-      allow read, write: if request.auth.uid == uid;
-      // 管理員可讀寫所有使用者
-      allow read, write: if request.auth.token.email == 'bestgiow@gmail.com';
+      allow get:  if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      // 第一次登入前端會自建文件，但只能建成 pending，不能自己封自己當 admin
+      allow create: if signedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.email == request.auth.token.email
+                    && (request.resource.data.role == 'pending' || ownerEmail());
+      allow update, delete: if isAdmin();
     }
+
+    match /defects/{id} {
+      allow read: if approved();
+      allow create, update, delete: if canEdit();
+    }
+
+    match /projects/{id} {
+      allow read: if approved();
+      allow write: if canEdit();
+    }
+
+    match /{document=**} { allow read, write: if false; }
   }
 }

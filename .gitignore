@@ -12,6 +12,27 @@ firebase-debug.*.log*
 
 # Firebase config
 
+# ⛔ 服務帳戶金鑰（萬能鑰匙，繞過 firestore.rules）
+# 這個 repo 是公開的，金鑰一旦推上去等於把資料庫鑰匙貼在網路上。
+# 以下規則讓 git add . 也絕對帶不走它們。
+*firebase-adminsdk*.json
+*-adminsdk-*.json
+serviceAccount*.json
+
+# ⛔ 資料庫備份與匯出（含全部安衛缺失紀錄，不該進版本控制）
+backup_defects_*.json
+defects_backup_*.json
+records.json
+exports/
+
+# ⛔ 工地現場照片（公務資料，這個 repo 是公開的）
+*_photos/
+photos_*/
+import_photos/
+
+# macOS 雜物
+.DS_Store
+
 # Uncomment this if you'd like others to create their own Firebase project.
 # For a team working on the same Firebase project(s), it is recommended to leave
 # it commented so all members can deploy to the same project(s) in .firebaserc.

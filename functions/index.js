@@ -1,31 +1,24 @@
-const { onRequest } = require("firebase-functions/v2/https");
 const Anthropic = require("@anthropic-ai/sdk");
-
-exports.aiAnalyze = onRequest({ cors: true }, async (req, res) => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  const client = new Anthropic({ apiKey });
-  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
-  const { title } = req.body;
-  if (!title) return res.status(400).json({ error: "缺少缺失名稱" });
+const {onRequest} = require("firebase-functions/v2/https");
+const client = new Anthropic.Anthropic();
+exports.aiAnalyze = onRequest(async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  if (req.method === "OPTIONS") { res.set("Access-Control-Allow-Methods", "POST"); res.set("Access-Control-Allow-Headers", "Content-Type"); return res.status(204).send(""); }
+  if (!req.body || !req.body.title) return res.status(400).json({ error: "缺少缺失名稱" });
+  const title = req.body.title;
   try {
-    const prompt = "你是台灣職業安全衛生法規專家。\n缺失名稱：" + title + "\n\n請回傳JSON（只有JSON不要其他文字），包含：\n1. laws：陣列，列出2~4條最相關的法規，每條包含 law_name、law_no（純數字）、law_pcode、lawtext（條文核心義務20字內）\n2. hazard：具體危害40字內\n3. improve：改善措施40字內\n4. plain：白話說明40字內\n\n法規代碼：職業安全衛生法N0060001、職業安全衛生設施規則N0060009、營造安全衛生設施標準N0060014、職業安全衛生管理辦法N0060008、危險性機械及設備安全檢查規則N0060006\n\n範例：{\"laws\":[{\"law_name\":\"職業安全衛生設施規則\",\"law_no\":\"281\",\"law_pcode\":\"N0060009\",\"lawtext\":\"高度2公尺以上應設護欄\"},{\"law_name\":\"營造安全衛生設施標準\",\"law_no\":\"40\",\"law_pcode\":\"N0060014\",\"lawtext\":\"施工架應設上下欄杆及踢腳板\"}],\"hazard\":\"危害說明\",\"improve\":\"改善措施\",\"plain\":\"白話說明\"}";
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 1500,
-      messages: [{ role: "user", content: prompt }]
-    });
+    const prompt = `你是台灣職業安全衛生法規專家。\n缺失名稱：${title}\n\n請從以下法規中找出最相關的2-4條條文：\n- 職業安全衛生法（pcode: N0060001）\n- 職業安全衛生設施規則（pcode: N0060009）\n- 營造安全衛生設施標準（pcode: N0060014）\n- 職業安全衛生管理辦法（pcode: N0060027）\n- 危險性機械及設備安全檢查規則（pcode: N0060039）\n- 營建工程空氣污染防制設施管理辦法（pcode: O0020058）\n- 道路交通安全規則（pcode: K0040013）\n\n重要規則：\n1. law_name 必須完全符合上面列出的法規名稱\n2. law_no 只填條號本身，不要加「第」「條」。條號帶「之」的寫成 21-1、239-1 這種格式，不要寫成 211、2391\n3. lawtext 留空字串\n4. 不確定就少建議，不要亂猜\n\n回傳JSON：{"laws":[{"law_name":"法規名稱","law_no":"條號","law_pcode":"pcode","lawtext":""}],"hazard":"危害說明40字","improve":"改善措施40字","plain":"白話說明40字"}`;
+    const message = await client.messages.create({ model: "claude-sonnet-4-5", max_tokens: 1500, messages: [{ role: "user", content: prompt }] });
     const text = message.content[0].text;
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("No JSON: " + text);
     const result = JSON.parse(match[0]);
-    if (result.laws) {
-      result.laws = result.laws.map(l => ({ ...l, law_no: String(l.law_no).replace(/[^0-9]/g, "") }));
-    }
-    res.set("Access-Control-Allow-Origin", "*");
+    // 條號正規化：保留「-」，「之」轉「-」。舊版把非數字全刪，會讓 21-1 變成 211（曾寫錯進資料庫）
+    const normNo = (s) => String(s ?? "").replace(/[第條\s]/g, "").replace(/之/g, "-").replace(/[^0-9-]/g, "");
+    if (result.laws) result.laws = result.laws.map(l => ({ ...l, law_no: normNo(l.law_no) }));
     res.json(result);
   } catch (e) {
     console.error(e);
-    res.set("Access-Control-Allow-Origin", "*");
     res.status(500).json({ error: e.message });
   }
 });

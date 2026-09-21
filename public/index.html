@@ -98,13 +98,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 .proj-row{display:flex;gap:8px;align-items:center}
 .proj-sel{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit;appearance:none}
 .btn-proj{height:42px;padding:0 14px;border:1px solid var(--blue);border-radius:10px;background:transparent;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.law-row{background:var(--bg2);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:4px}
+/* 法規欄位用藍色系底，跟其他灰底欄位區隔開 */
+.law-row{background:var(--blue-bg);border:1px solid var(--blue);border-left-width:4px;border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:4px}
 .law-row-top{display:flex;gap:6px;align-items:center}
 .law-sel{width:200px;height:36px;padding:0 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;appearance:none}
 .law-no{width:75px;height:36px;padding:0 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit}
+/* 修「選定法規後文字下緣被切掉」：上面 .fl input,.fl select 那條特異度較高，會把 padding 蓋成
+   10px 12px、font-size 蓋成 15px，但 height:36px 只寫在 .law-sel/.law-no，加上 border-box，
+   內容區只剩 14px 高，裝不下 15px 的字。這裡把垂直尺寸改由內容決定。 */
+.fl .law-sel,.fl .law-no{height:auto;min-height:38px;padding:8px 12px;line-height:1.4}
 .law-del{width:30px;height:30px;border:none;background:none;color:var(--text3);font-size:20px;cursor:pointer;flex-shrink:0}
 .law-hint{font-size:12px;color:var(--blue);display:none;padding-top:2px}
-.btn-add-law{height:36px;padding:0 14px;border:1px dashed var(--border2);border-radius:8px;background:transparent;color:var(--blue);font-size:13px;cursor:pointer;font-family:inherit;text-align:left;margin-top:4px}
+.btn-add-law{height:36px;padding:0 14px;border:1px dashed var(--blue);border-radius:8px;background:var(--blue-bg);color:var(--blue);font-size:13px;cursor:pointer;font-family:inherit;text-align:left;margin-top:4px}
 .photo-area{border:1.5px dashed var(--border2);border-radius:12px;padding:20px;text-align:center;cursor:pointer;color:var(--text2);font-size:14px;display:flex;flex-direction:column;align-items:center;gap:6px}
 .photo-area input{display:none}
 .btn-submit{height:50px;background:var(--blue);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;width:100%;font-family:inherit}
@@ -273,15 +278,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
         </div>
         <div class="fl"><label>嚴重等級</label>
           <div class="sev-sel">
-            <button class="sev-btn sel-d" onclick="pickSev(this,&#39;立即危險&#39;)">立即危險</button>
-            <button class="sev-btn" onclick="pickSev(this,&#39;一般缺失&#39;)">一般缺失</button>
+            <button class="sev-btn" onclick="pickSev(this,&#39;立即危險&#39;)">立即危險</button>
+            <button class="sev-btn sel-m" onclick="pickSev(this,&#39;一般缺失&#39;)">一般缺失</button>
           </div>
         </div>
       </div>
       <div class="fl"><label>備註</label><textarea id="f_desc" placeholder="備註…"></textarea></div>
       <div class="fl">
         <label>依據法規</label>
-        <div id="f_laws_wrap" style="display:flex;flex-direction:column;gap:8px"><div class="law-row" id="f_lr_1780108497807"><div class="law-row-top"><select class="law-sel" onchange="updLaw(&#39;f&#39;,1780108497807)"><option value="">選擇法規</option><option value="職業安全衛生法|N0060001">職業安全衛生法</option><option value="職業安全衛生設施規則|N0060009">職業安全衛生設施規則</option><option value="營造安全衛生設施標準|N0060014">營造安全衛生設施標準</option><option value="職業安全衛生管理辦法|N0060008">職業安全衛生管理辦法</option><option value="危險性機械及設備安全檢查規則|N0060006">危險性機械及設備安全檢查規則</option><option value="營建工程空氣污染防制設施管理辦法|O0020058">營建工程空氣污染防制設施管理辦法</option></select><input class="law-no" type="text" placeholder="條號" oninput="updLaw(&#39;f&#39;,1780108497807)"><button class="law-del" onclick="delLaw(&#39;f&#39;,1780108497807)">×</button></div><div class="law-hint" id="f_lh_1780108497807"></div><input type="text" class="law-custom" id="f_lc_1780108497807" placeholder="或直接輸入法規文字" style="width:100%;margin-top:4px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;display:none"></div></div>
+        <div id="f_laws_wrap" style="display:flex;flex-direction:column;gap:8px"><div class="law-row" id="f_lr_1780108497807"><div class="law-row-top"><select class="law-sel" onchange="updLaw(&#39;f&#39;,1780108497807)"><option value="">選擇法規</option><option value="職業安全衛生法|N0060001">職業安全衛生法</option><option value="職業安全衛生設施規則|N0060009">職業安全衛生設施規則</option><option value="營造安全衛生設施標準|N0060014">營造安全衛生設施標準</option><option value="職業安全衛生管理辦法|N0060027">職業安全衛生管理辦法</option><option value="危險性機械及設備安全檢查規則|N0060039">危險性機械及設備安全檢查規則</option><option value="營建工程空氣污染防制設施管理辦法|O0020058">營建工程空氣污染防制設施管理辦法</option><option value="道路交通安全規則|K0040013">道路交通安全規則</option></select><input class="law-no" type="text" placeholder="條號" oninput="updLaw(&#39;f&#39;,1780108497807)"><button class="law-del" onclick="delLaw(&#39;f&#39;,1780108497807)">×</button></div><div class="law-hint" id="f_lh_1780108497807"></div><input type="text" class="law-custom" id="f_lc_1780108497807" placeholder="或直接輸入法規文字" style="width:100%;margin-top:4px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;display:none"></div></div>
         <button type="button" class="btn-add-law" onclick="addLaw(&#39;f&#39;)">＋ 新增法規條文</button>
       </div>
       <div class="fl"><label>法規原文 <button type="button" onclick="fillLawText('f')" style="margin-left:6px;font-size:12px;padding:3px 10px;background:var(--blue,#3a7bd5);color:#fff;border:none;border-radius:6px;cursor:pointer">📖 帶出條文</button><span id="f_lawtext_status" style="font-size:12px;margin-left:6px;color:#888"></span></label><textarea id="f_lawtext" placeholder="選好法規與條號後，點「帶出條文」自動填入，或手動貼上…" style="min-height:60px"></textarea></div>
@@ -350,7 +355,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
       <div class="fl"><label>備註</label><textarea id="e_desc"></textarea></div>
       <div class="fl">
         <label>依據法規</label>
-        <div id="e_laws_wrap" style="display:flex;flex-direction:column;gap:8px"><div class="law-row" id="e_lr_1780108497681"><div class="law-row-top"><select class="law-sel" onchange="updLaw(&#39;e&#39;,1780108497681)"><option value="">選擇法規</option><option value="職業安全衛生法|N0060001">職業安全衛生法</option><option value="職業安全衛生設施規則|N0060009">職業安全衛生設施規則</option><option value="營造安全衛生設施標準|N0060014">營造安全衛生設施標準</option><option value="職業安全衛生管理辦法|N0060008">職業安全衛生管理辦法</option><option value="危險性機械及設備安全檢查規則|N0060006">危險性機械及設備安全檢查規則</option><option value="營建工程空氣污染防制設施管理辦法|O0020058">營建工程空氣污染防制設施管理辦法</option></select><input class="law-no" type="text" placeholder="條號" oninput="updLaw(&#39;e&#39;,1780108497681)"><button class="law-del" onclick="delLaw(&#39;e&#39;,1780108497681)">×</button></div><div class="law-hint" id="e_lh_1780108497681"></div><input type="text" class="law-custom" id="e_lc_1780108497681" placeholder="或直接輸入法規文字" style="width:100%;margin-top:4px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;display:none"></div></div>
+        <div id="e_laws_wrap" style="display:flex;flex-direction:column;gap:8px"><div class="law-row" id="e_lr_1780108497681"><div class="law-row-top"><select class="law-sel" onchange="updLaw(&#39;e&#39;,1780108497681)"><option value="">選擇法規</option><option value="職業安全衛生法|N0060001">職業安全衛生法</option><option value="職業安全衛生設施規則|N0060009">職業安全衛生設施規則</option><option value="營造安全衛生設施標準|N0060014">營造安全衛生設施標準</option><option value="職業安全衛生管理辦法|N0060027">職業安全衛生管理辦法</option><option value="危險性機械及設備安全檢查規則|N0060039">危險性機械及設備安全檢查規則</option><option value="營建工程空氣污染防制設施管理辦法|O0020058">營建工程空氣污染防制設施管理辦法</option><option value="道路交通安全規則|K0040013">道路交通安全規則</option></select><input class="law-no" type="text" placeholder="條號" oninput="updLaw(&#39;e&#39;,1780108497681)"><button class="law-del" onclick="delLaw(&#39;e&#39;,1780108497681)">×</button></div><div class="law-hint" id="e_lh_1780108497681"></div><input type="text" class="law-custom" id="e_lc_1780108497681" placeholder="或直接輸入法規文字" style="width:100%;margin-top:4px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;display:none"></div></div>
         <button type="button" class="btn-add-law" onclick="addLaw(&#39;e&#39;)">＋ 新增法規條文</button>
       </div>
       <div class="fl"><label>法規原文 <button type="button" onclick="fillLawText('e')" style="margin-left:6px;font-size:12px;padding:3px 10px;background:var(--blue,#3a7bd5);color:#fff;border:none;border-radius:6px;cursor:pointer">📖 帶出條文</button><span id="e_lawtext_status" style="font-size:12px;margin-left:6px;color:#888"></span></label><textarea id="e_lawtext" style="min-height:60px"></textarea></div>
@@ -746,7 +751,7 @@ async function uploadPhoto(docId,idx,dataUri){
 const ADMIN_EMAILS=['bestgiow@gmail.com'];
 let currentUser=null,isAdmin=false,userRole=null,userProjects=[];
 
-let records=[],projects={},activeCat='全部',lawFilter='all',selSev='立即危險',editSev='一般缺失',detailId=null,editPhotoB64=null,editPhotoRot=0,editExistingPhotos=[],editNewPhotos=[];
+let records=[],projects={},activeCat='全部',lawFilter='all',selSev='一般缺失',editSev='一般缺失',detailId=null,editPhotoB64=null,editPhotoRot=0,editExistingPhotos=[],editNewPhotos=[];
 
 const CATS=['全部','一、環境保護','二、個人防護具及管理','三、火災防護','四、墜落','五、感電','六、物體倒/崩塌','七、吊掛作業/物體飛落','八、物料、機具管理','九、交通安全及維持','十、安全衛生管理','十一、局限空間'];
 // 顯示用：把類別開頭的中文編號（一、二…十一、）轉成阿拉伯數字「1. 」。資料庫仍存中文編號，僅顯示改變。
@@ -766,13 +771,15 @@ function catNoNum(cat){
 }
 const SEV_DOT={'立即危險':'#E24B4A','一般缺失':'#BA7517'};
 const SEV_CLS={'立即危險':'badge-d','一般缺失':'badge-m'};
+// pcode 要跟下方 LAW_PCODE_MAP 一致；改這裡時兩邊一起改
 const LAWS=[
   {v:'職業安全衛生法|N0060001',t:'職業安全衛生法'},
   {v:'職業安全衛生設施規則|N0060009',t:'職業安全衛生設施規則'},
   {v:'營造安全衛生設施標準|N0060014',t:'營造安全衛生設施標準'},
-  {v:'職業安全衛生管理辦法|N0060008',t:'職業安全衛生管理辦法'},
-  {v:'危險性機械及設備安全檢查規則|N0060006',t:'危險性機械及設備安全檢查規則'},
+  {v:'職業安全衛生管理辦法|N0060027',t:'職業安全衛生管理辦法'},
+  {v:'危險性機械及設備安全檢查規則|N0060039',t:'危險性機械及設備安全檢查規則'},
   {v:'營建工程空氣污染防制設施管理辦法|O0020058',t:'營建工程空氣污染防制設施管理辦法'},
+  {v:'道路交通安全規則|K0040013',t:'道路交通安全規則'},
 ];
 
 function lawOptsHTML(){return'<option value="">選擇法規</option>'+LAWS.map(l=>`<option value="${l.v}">${l.t}</option>`).join('');}
@@ -1089,7 +1096,7 @@ window.saveRecord=async function(keepOpen){
       // 儲存並關閉：完整清空後收起表單
       document.getElementById('f_project').value='';document.getElementById('f_location').value='';
       document.getElementById('f_date').value=new Date().toISOString().split('T')[0];
-      selSev='立即危險';document.querySelectorAll('#addSheet .sev-btn').forEach(b=>b.className='sev-btn');document.querySelector('#addSheet .sev-btn').classList.add('sel-d');
+      selSev='一般缺失';document.querySelectorAll('#addSheet .sev-btn').forEach(b=>b.className='sev-btn');document.querySelectorAll('#addSheet .sev-btn')[1].classList.add('sel-m');
       closeSheet('addSheet');render();toast('記錄已儲存');
     }
   }catch(e){toast('儲存失敗：'+e.message);}
@@ -1355,39 +1362,43 @@ window.saveUser = async function(uid) {
   }
 };
 
-// ── 查詢真實法條 ──
+// ── 查詢真實法條（改讀本站 /laws/ 的離線法規檔，2026-07-30）──
+// 法規檔用 build_laws.js 產生，修法後重跑該腳本再部署即可。
 const LAW_PCODE_MAP = {
   '職業安全衛生法': 'N0060001',
   '職業安全衛生設施規則': 'N0060009',
   '營造安全衛生設施標準': 'N0060014',
-  '職業安全衛生管理辦法': 'N0060008',
-  '危險性機械及設備安全檢查規則': 'N0060006',
+  '職業安全衛生管理辦法': 'N0060027',          // 舊值 N0060008 是錯的（該檔不存在）
+  '危險性機械及設備安全檢查規則': 'N0060039',   // 舊值 N0060006 是「碼頭裝卸安全衛生設施標準」
   '營建工程空氣污染防制設施管理辦法': 'O0020058',
+  '道路交通安全規則': 'K0040013',
 };
-const lawCache = {};
+const lawFileCache = {};   // pcode → { articles:{條號:條文} }
+
+// 條號正規化：「第 21-1 條」「21條之1」「21之1」→ "21-1"
+function normArticleNo(no) {
+  return String(no ?? '')
+    .replace(/[第條\s　]/g, '')
+    .replace(/之/g, '-')
+    .trim();
+}
+
+async function loadLawFile(pcode) {
+  if(lawFileCache[pcode]) return lawFileCache[pcode];
+  const resp = await fetch(`/laws/${pcode}.json`);
+  if(!resp.ok) throw new Error(`載入法規檔失敗 ${pcode}: ${resp.status}`);
+  const data = await resp.json();
+  lawFileCache[pcode] = data;
+  return data;
+}
 
 async function fetchLawArticle(lawName, articleNo) {
   const pcode = LAW_PCODE_MAP[lawName];
   if(!pcode) return null;
-  const cacheKey = pcode + '_' + articleNo;
-  if(lawCache[cacheKey]) return lawCache[cacheKey];
   try {
-    const url = `https://raw.githubusercontent.com/kong0107/mojLawSplitJSON/master/FalVMingLing/${pcode}.json`;
-    const resp = await fetch(url);
-    if(!resp.ok) return null;
-    const data = await resp.json();
-    const articles = data['法規內容'] || data.articles || [];
-    const target = String(articleNo).replace(/[^\d]/g,'');
-    const found = articles.find(a => {
-      const aNo = String(a['條號'] || a.number || '').replace(/[^\d]/g,'');
-      return aNo === target;
-    });
-    if(found) {
-      const text = (found['條文內容'] || found.content || '').replace(/\r/g,'').trim();
-      lawCache[cacheKey] = text;
-      return text;
-    }
-    return null;
+    const data = await loadLawFile(pcode);
+    const key = normArticleNo(articleNo);
+    return data.articles[key] || null;   // 完全比對，21-1 不會再誤中 211
   } catch(e) {
     console.log('法條查詢失敗:', e);
     return null;
@@ -1500,17 +1511,17 @@ onAuthStateChanged(auth, async user => {
     await loadRecords();
 
   } else {
-    // 無登入：直接以管理員身份進入
+    // 無登入：顯示登入畫面，不載入任何資料
     currentUser = null;
-    isAdmin = true;
-    userRole = 'admin';
+    isAdmin = false;
+    userRole = null;
     userProjects = [];
-    document.getElementById('loginScreen').style.display = 'none';
+    records = [];
+    projects = {};
+    document.getElementById('loginScreen').style.display = 'flex';
     document.getElementById('pendingScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('mainApp').style.display = 'none';
     document.getElementById('userBar').style.display = 'none';
-    await loadProjects();
-    await loadRecords();
   }
 });
 </script>
