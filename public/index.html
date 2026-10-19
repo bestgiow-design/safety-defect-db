@@ -560,9 +560,10 @@ function ymOf(dateStr){ return dateStr?dateStr.slice(0,7):''; }
 function thisYM(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 
 // 計算某案的督導月份集合（實際有紀錄的月）
+// ym＝歸屬月份：補督的批次（如 9/1 補 8 月份）督考日期照實填，另存 ym 讓覆蓋率算進該月
 function supervisedMonths(projName){
   const s=new Set();
-  (records||[]).forEach(r=>{ if(r.project===projName && r.date) s.add(ymOf(r.date)); });
+  (records||[]).forEach(r=>{ if(r.project===projName && (r.ym||r.date)) s.add(r.ym||ymOf(r.date)); });
   return s;
 }
 
