@@ -208,6 +208,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
   <button class="chip" onclick="exportExcel()" style="height:36px;border-radius:10px;background:#1a7a3c;color:#fff;border-color:#1a7a3c">📊 匯出Excel</button>
   <button class="chip" onclick="exportPDF()" style="height:36px;border-radius:10px;background:#c0392b;color:#fff;border-color:#c0392b">🖨️ 匯出PDF</button>
   <button class="chip" onclick="openCoverage()" style="height:36px;border-radius:10px;background:#6c4bb6;color:#fff;border-color:#6c4bb6">📅 督導覆蓋率</button>
+  <button class="chip" onclick="openStats()" style="height:36px;border-radius:10px;background:#185FA5;color:#fff;border-color:#185FA5">📈 統計圖表</button>
   <button class="btn-clear" onclick="clearFilters()" id="clearFilterBtn" style="display:none">✕ 清除</button>
 </div>
 
@@ -734,6 +735,170 @@ window.exportCoverage = async function(){
     setTimeout(()=>URL.revokeObjectURL(a.href),1000);
     toast('已匯出督導覆蓋率');
   }catch(e){ toast('匯出失敗：'+e.message); }
+};
+
+// ══════════ 統計圖表 ══════════
+// 給自己掌握各案狀況：選期間＋案名，出四張圖，每張可下載 PNG（下載一律用淺色底，方便貼進文件）
+// 月份跟督導覆蓋率一樣看 ym||date，補督批次算進歸屬月份
+const ST_FONT="-apple-system,BlinkMacSystemFont,'PingFang TC','Microsoft JhengHei',sans-serif";
+const ST_THEME={
+  light:{bg:'#ffffff',bar:'#185FA5',text:'#1a1a1a',text2:'#666666',grid:'#ececec',axis:'#cccccc'},
+  dark:{bg:'#1c1c1e',bar:'#378ADD',text:'#f2f2f7',text2:'#aeaeb2',grid:'#3a3a3c',axis:'#48484a'},
+};
+function stTheme(){ return matchMedia('(prefers-color-scheme: dark)').matches?ST_THEME.dark:ST_THEME.light; }
+function stEsc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function stYM(r){ return r.ym||ymOf(r.date); }
+// 法規簡稱：圖上的標籤要短，tooltip 再給全名
+const ST_LAW_ABBR={'職業安全衛生設施規則':'設施規則','營造安全衛生設施標準':'營標','職業安全衛生法':'職安法','職業安全衛生管理辦法':'職安管理辦法',
+  '營建工程空氣污染防制設施管理辦法':'空污辦法','危險性機械及設備安全檢查規則':'危機規則','危害性化學品標示及通識規則':'通識規則','道路交通安全規則':'道安規則'};
+
+let stState={from:'',to:'',proj:''};
+let stCharts=[]; // 目前畫面上的圖：{key,title,draw(theme)}
+
+window.openStats=function(){
+  const months=[...new Set((records||[]).map(stYM).filter(Boolean))].sort();
+  if(!stState.to) stState.to=months[months.length-1]||thisYM();
+  if(!stState.from) stState.from=months[0]||stState.to;
+  const sel=document.getElementById('stProj');
+  sel.innerHTML='<option value="">全部案名</option>'+allProjectNames().map(n=>`<option value="${stEsc(n)}">${stEsc(n)}</option>`).join('');
+  sel.value=stState.proj;
+  document.getElementById('stFrom').value=stState.from;
+  document.getElementById('stTo').value=stState.to;
+  document.getElementById('statsSheet').style.display='flex';
+  renderStats();
+};
+window.stChange=function(){
+  stState.from=document.getElementById('stFrom').value;
+  stState.to=document.getElementById('stTo').value;
+  stState.proj=document.getElementById('stProj').value;
+  renderStats();
+};
+
+// 橫條圖：data=[{label,value,tip}]，由大到小已排好
+function stHBar(data,th){
+  const W=640,labW=150,valW=44,row=30,barH=18,top=6;
+  const H=top*2+data.length*row, max=Math.max(1,...data.map(d=>d.value)), plotW=W-labW-valW;
+  let s='';
+  data.forEach((d,i)=>{
+    const y=top+i*row, w=Math.max(2,d.value/max*plotW), by=y+(row-barH)/2, r=Math.min(4,w);
+    s+=`<g data-tip="${stEsc(d.tip)}"><rect x="0" y="${y}" width="${W}" height="${row}" fill="transparent"/>`
+      +`<text x="${labW-10}" y="${y+row/2}" text-anchor="end" dominant-baseline="central" font-size="13" fill="${th.text}">${stEsc(d.label)}</text>`
+      +`<path d="M${labW},${by}h${w-r}a${r},${r} 0 0 1 ${r},${r}v${barH-2*r}a${r},${r} 0 0 1 -${r},${r}h-${w-r}z" fill="${th.bar}"/>`
+      +`<text x="${labW+w+6}" y="${y+row/2}" dominant-baseline="central" font-size="12" fill="${th.text2}">${d.value}</text></g>`;
+  });
+  s+=`<line x1="${labW}" y1="${top}" x2="${labW}" y2="${H-top}" stroke="${th.axis}" stroke-width="1"/>`;
+  return {W,H,body:s};
+}
+// 直條圖（逐月）：data=[{label,value,tip}]，0 也要畫出位置
+function stVBar(data,th){
+  const W=640,H=240,l=36,r=8,t=20,b=28, plotW=W-l-r, plotH=H-t-b;
+  const max=Math.max(1,...data.map(d=>d.value));
+  const step=max<=5?1:max<=10?2:max<=25?5:max<=50?10:20, top=Math.ceil(max/step)*step;
+  let s='';
+  for(let v=0;v<=top;v+=step){
+    const y=t+plotH-v/top*plotH;
+    s+=`<line x1="${l}" y1="${y}" x2="${W-r}" y2="${y}" stroke="${v===0?th.axis:th.grid}" stroke-width="1"/>`
+      +`<text x="${l-6}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="11" fill="${th.text2}">${v}</text>`;
+  }
+  const band=plotW/Math.max(1,data.length), bw=Math.min(24,band*0.6);
+  const every=data.length>18?3:data.length>9?2:1;
+  data.forEach((d,i)=>{
+    const cx=l+band*i+band/2, h=d.value/top*plotH, y=t+plotH-h, rr=Math.min(4,h);
+    s+=`<g data-tip="${stEsc(d.tip)}"><rect x="${cx-band/2}" y="${t}" width="${band}" height="${plotH+b}" fill="transparent"/>`;
+    if(d.value>0) s+=`<path d="M${cx-bw/2},${t+plotH}v-${h-rr}a${rr},${rr} 0 0 1 ${rr},-${rr}h${bw-2*rr}a${rr},${rr} 0 0 1 ${rr},${rr}v${h-rr}z" fill="${th.bar}"/>`
+      +`<text x="${cx}" y="${y-5}" text-anchor="middle" font-size="11" fill="${th.text2}">${d.value}</text>`;
+    if(i%every===0) s+=`<text x="${cx}" y="${H-8}" text-anchor="middle" font-size="11" fill="${th.text2}">${stEsc(d.label)}</text>`;
+    s+='</g>';
+  });
+  return {W,H,body:s};
+}
+function stSvg(g,th,title){
+  // title 只在下載的圖片裡畫，畫面上標題在卡片頭
+  const tH=title?40:0;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${g.W} ${g.H+tH}" width="${g.W}" height="${g.H+tH}" style="width:100%;height:auto;font-family:${ST_FONT}" font-family="${ST_FONT}">`
+    +(title?`<rect width="100%" height="100%" fill="${th.bg}"/><text x="0" y="22" font-size="16" font-weight="600" fill="${th.text}">${stEsc(title)}</text>`:'')
+    +`<g transform="translate(0,${tH})">${g.body}</g></svg>`;
+}
+
+function renderStats(){
+  const {from,to,proj}=stState;
+  const rows=(records||[]).filter(r=>{ const m=stYM(r); return m && (!from||m>=from) && (!to||m<=to) && (!proj||r.project===proj); });
+  const visits=new Set(rows.map(r=>r.project+'|'+r.date));
+  const danger=rows.filter(r=>r.sev==='立即危險').length;
+  const period=`${(from||'').replace('-','/')}～${(to||'').replace('-','/')}`;
+  const scope=(proj||'全部案名')+'，'+period;
+
+  // 1. 各案件數（加督導場次，次數不同的案才比得公平）
+  const byProj={};
+  rows.forEach(r=>{ const p=r.project||'（未填案名）'; (byProj[p]=byProj[p]||{n:0,v:new Set()}).n++; byProj[p].v.add(r.date); });
+  const projData=Object.entries(byProj).sort((a,b)=>b[1].n-a[1].n).map(([p,x])=>({label:p,value:x.n,tip:`${p}：${x.n} 筆／${x.v.size} 場督導，平均每場 ${(x.n/x.v.size).toFixed(1)} 筆`}));
+  // 2. 類別
+  const byCat={};
+  rows.forEach(r=>{ const c=r.cat||'（未分類）'; byCat[c]=(byCat[c]||0)+1; });
+  const catData=Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,n])=>({label:catDisplay(c),value:n,tip:`${catDisplay(c)}：${n} 筆（${(n/rows.length*100).toFixed(0)}%）`}));
+  // 3. 逐月（期間內每個月都列，沒有缺失的月是 0）
+  const byM={}; rows.forEach(r=>{ const m=stYM(r); byM[m]=(byM[m]||0)+1; });
+  const monthData=monthRange(from,to).map(m=>{ const [y,mm]=m.split('-'); return {label:`${+y-1911}/${+mm}`,value:byM[m]||0,tip:`${+y-1911}年${+mm}月：${byM[m]||0} 筆`}; });
+  // 4. 法條排行 Top 10（一筆引多條，每條各算一次）
+  const byLaw={};
+  rows.forEach(r=>{ (Array.isArray(r.laws)?r.laws:[]).forEach(l=>{ if(!l||!l.name||!l.no)return; const k=l.name+'|'+l.no; byLaw[k]=(byLaw[k]||0)+1; }); });
+  const lawData=Object.entries(byLaw).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,n])=>{ const [name,no]=k.split('|'); return {label:`${ST_LAW_ABBR[name]||name} ${no}`,value:n,tip:`${name}第${no}條：${n} 筆`}; });
+
+  stCharts=[];
+  const add=(key,title,data,kind,note)=>{ if(data.length) stCharts.push({key,title,note,draw:th=>(kind==='v'?stVBar:stHBar)(data,th)}); };
+  if(!proj) add('各案缺失件數','各案缺失件數',projData,'h','滑過長條可看督導場次與平均每場件數');
+  add('缺失類別分布','缺失類別分布',catData,'h');
+  add('逐月缺失件數','逐月缺失件數',monthData,'v','月份依歸屬月份計，補督批次算進前一個月');
+  add('最常違反的法條','最常違反的法條（前 10 名）',lawData,'h','一筆缺失引用多條法規時，每條各算一次');
+
+  const th=stTheme();
+  const tile=(n,l,c)=>`<div class="stat"><div class="stat-n"${c?` style="color:${c}"`:''}>${n}</div><div class="stat-l">${l}</div></div>`;
+  let html=`<div class="stats" style="grid-template-columns:repeat(4,1fr);padding:0">`
+    +tile(rows.length,'缺失筆數')+tile(visits.size,'督導場次')+tile(visits.size?(rows.length/visits.size).toFixed(1):'0','平均每場筆數')
+    +tile(danger,'立即危險',danger?'var(--red)':'')+`</div>`;
+  if(!rows.length) html+='<div style="text-align:center;color:var(--text3);padding:30px">這個期間沒有缺失資料</div>';
+  stCharts.forEach((c,i)=>{
+    html+=`<div style="border:1px solid var(--border);border-radius:12px;padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
+        <div style="font-size:15px;font-weight:600">${stEsc(c.title)}</div>
+        <button onclick="stDownload(${i})" style="padding:6px 12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap">⬇ 下載圖片</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px">${stEsc(scope)}${c.note?'｜'+stEsc(c.note):''}</div>
+      <div class="st-plot" style="position:relative">${stSvg(c.draw(th),th)}</div>
+    </div>`;
+  });
+  const body=document.getElementById('statsBody');
+  body.innerHTML=html;
+  body.querySelectorAll('.st-plot').forEach(stBindTip);
+}
+// 滑過圖形顯示 tooltip（整列／整欄都是感應區，比長條本身大）
+function stBindTip(el){
+  const tip=document.getElementById('stTip');
+  el.addEventListener('mousemove',e=>{
+    const g=e.target.closest('[data-tip]');
+    if(!g){ tip.style.display='none'; return; }
+    tip.textContent=g.getAttribute('data-tip'); tip.style.display='block';
+    const x=Math.min(e.clientX+14,window.innerWidth-tip.offsetWidth-8);
+    tip.style.left=x+'px'; tip.style.top=(e.clientY+14)+'px';
+  });
+  el.addEventListener('mouseleave',()=>{ tip.style.display='none'; });
+}
+window.stDownload=async function(i){
+  const c=stCharts[i]; if(!c) return;
+  const th=ST_THEME.light;
+  const {from,to,proj}=stState;
+  const svg=stSvg(c.draw(th),th,`${c.title}｜${proj||'全部案名'} ${from.replace('-','/')}～${to.replace('-','/')}`);
+  const m=svg.match(/viewBox="0 0 (\d+) (\d+)"/), W=+m[1], H=+m[2], pad=24, scale=2;
+  const img=new Image();
+  img.onload=()=>{
+    const cv=document.createElement('canvas'); cv.width=(W+pad*2)*scale; cv.height=(H+pad*2)*scale;
+    const ctx=cv.getContext('2d'); ctx.fillStyle=th.bg; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.drawImage(img,pad*scale,pad*scale,W*scale,H*scale);
+    cv.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+      a.download=`統計_${c.key}_${proj||'全部'}_${from}~${to}.png`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); toast('已下載圖片'); },'image/png');
+  };
+  img.onerror=()=>toast('圖片產生失敗');
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 };
 
 // 取得一筆缺失的照片清單：優先用 photoUrls（Storage 網址，輕量），沒有才退回 base64
@@ -1554,6 +1719,24 @@ onAuthStateChanged(auth, async user => {
     </div>
   </div>
 </div>
+
+<!-- 統計圖表 -->
+<div class="overlay" id="statsSheet" onclick="if(event.target===this)this.style.display=&#39;none&#39;" style="display:none;align-items:center;justify-content:center">
+  <div onclick="event.stopPropagation()" style="background:var(--bg);border-radius:14px;box-shadow:0 12px 48px rgba(0,0,0,.35);max-height:90vh;width:720px;max-width:94vw;display:flex;flex-direction:column">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;background:var(--bg2)">
+      <h2 style="display:flex;align-items:center;gap:8px;margin:0;font-size:18px"><span style="font-size:20px">📈</span> 統計圖表</h2>
+      <button class="sheet-close" onclick="document.getElementById(&#39;statsSheet&#39;).style.display=&#39;none&#39;" style="position:static">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)">
+      <input type="month" id="stFrom" class="filter-sel" onchange="stChange()" style="flex:0 1 150px">
+      <span class="filter-date-sep">～</span>
+      <input type="month" id="stTo" class="filter-sel" onchange="stChange()" style="flex:0 1 150px">
+      <select id="stProj" class="filter-sel" onchange="stChange()" style="flex:1 1 160px"></select>
+    </div>
+    <div class="sheet-body" id="statsBody" style="overflow:auto"></div>
+  </div>
+</div>
+<div id="stTip" style="display:none;position:fixed;z-index:60;pointer-events:none;background:var(--text);color:var(--bg);font-size:12px;padding:6px 10px;border-radius:8px;max-width:280px;box-shadow:0 4px 14px rgba(0,0,0,.2)"></div>
 </div><!-- /mainApp -->
 
 
