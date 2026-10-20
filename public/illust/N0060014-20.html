@@ -1,0 +1,458 @@
+<title>護欄第20條一頁圖</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --paper:#F9FAF8; --sheet:#FFFFFF; --ink:#1B2126; --ink-2:#4B555D; --ink-3:#8A949B;
+  --rule:#D5DAD8; --rule-soft:#E8ECEA;
+  --dim:#D2521A; --dim-soft:#FBE9E0;
+  --steel:#3F5F7A; --steel-soft:#E4ECF2;
+  --member:#2A3138; --toe:#F2C14E; --toe-line:#8A6A10;
+  --zone:rgba(210,82,26,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#15181B; --sheet:#1C2024; --ink:#E7E9E5; --ink-2:#B4BBBF; --ink-3:#7E878D;
+    --rule:#343B41; --rule-soft:#272D32;
+    --dim:#F08245; --dim-soft:#3A2418;
+    --steel:#8FB3CF; --steel-soft:#22303B;
+    --member:#D6DBDF; --toe:#D9AC3A; --toe-line:#F2D27A;
+    --zone:rgba(240,130,69,.10);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15181B; --sheet:#1C2024; --ink:#E7E9E5; --ink-2:#B4BBBF; --ink-3:#7E878D;
+  --rule:#343B41; --rule-soft:#272D32;
+  --dim:#F08245; --dim-soft:#3A2418;
+  --steel:#8FB3CF; --steel-soft:#22303B;
+  --member:#D6DBDF; --toe:#D9AC3A; --toe-line:#F2D27A;
+  --zone:rgba(240,130,69,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans TC",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.sheet{max-width:1100px;margin:24px auto 64px;background:var(--sheet);border:1px solid var(--rule);padding:0 0 32px}
+
+/* title block, drawn like a drawing sheet header */
+.tb{display:grid;grid-template-columns:1fr auto;border-bottom:2px solid var(--ink);padding:22px 32px 18px;gap:24px;align-items:end}
+.tb .eyebrow{font-size:12px;letter-spacing:.14em;color:var(--ink-2);text-transform:uppercase;margin:0 0 6px}
+.tb h1{margin:0;font-size:30px;font-weight:900;letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+.tb h1 small{display:block;font-size:14px;font-weight:500;color:var(--ink-2);letter-spacing:.06em;margin-top:6px}
+.meta{display:grid;grid-template-columns:auto auto;gap:4px 18px;font-size:12px;color:var(--ink-2);border-left:1px solid var(--rule);padding-left:18px}
+.meta dt{color:var(--ink-3);letter-spacing:.08em}
+.meta dd{margin:0;color:var(--ink)}
+.meta dt,.meta dd{white-space:nowrap}
+
+section{padding:26px 32px 0}
+h2{font-size:13px;letter-spacing:.16em;color:var(--ink-2);margin:0 0 12px;font-weight:700;display:flex;align-items:center;gap:12px}
+h2::after{content:"";flex:1;height:1px;background:var(--rule)}
+figure{margin:0}
+figure svg{display:block;width:100%;height:auto}
+figcaption{font-size:12.5px;color:var(--ink-2);margin-top:8px;line-height:1.5}
+.scroll{overflow-x:auto}
+
+/* svg classes */
+svg text{font-family:"Noto Sans TC",-apple-system,"PingFang TC",sans-serif;font-size:12px;fill:var(--ink)}
+svg text.n{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-weight:600;fill:var(--dim)}
+svg text.s{font-size:11px;fill:var(--ink-2)}
+svg text.t{font-size:12.5px;font-weight:700;fill:var(--steel)}
+svg text.k{font-size:11px;fill:var(--steel)}
+.member{fill:var(--member)}
+.post{fill:var(--member)}
+.toe{fill:var(--toe);stroke:var(--toe-line);stroke-width:1}
+.floor{fill:var(--ink)}
+.hatch-l{stroke:var(--ink);stroke-width:1;opacity:.35}
+.mesh-l{stroke:var(--steel);stroke-width:1;opacity:.7}
+.dim{stroke:var(--dim);stroke-width:1.25;fill:none}
+.ext{stroke:var(--dim);stroke-width:.9;stroke-dasharray:4 3;opacity:.75}
+.ar{fill:var(--dim)}
+.ld{stroke:var(--steel);stroke-width:1.8;fill:none}
+.ar-s{fill:var(--steel)}
+.bg{fill:var(--sheet);stroke:var(--rule);stroke-width:1}
+.zone{fill:var(--zone);stroke:var(--dim);stroke-width:1;stroke-dasharray:6 4}
+.ghost{fill:none;stroke:var(--ink-2);stroke-width:1.2;stroke-dasharray:3 3}
+.lead{stroke:var(--ink-3);stroke-width:1;fill:none}
+
+/* two-up */
+.two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+
+/* material table */
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--rule-soft);vertical-align:top;text-align:left}
+thead th{font-size:11.5px;letter-spacing:.08em;color:var(--ink-2);border-bottom:1px solid var(--ink);font-weight:700}
+tbody th{font-weight:700;white-space:nowrap;color:var(--ink)}
+td .n{color:var(--dim);font-weight:600}
+td.same{color:var(--ink-3)}
+.foot{font-size:12px;color:var(--ink-2);margin:8px 0 0}
+
+/* clause list */
+ol.cl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 26px}
+@media (max-width:820px){ol.cl{grid-template-columns:1fr}}
+ol.cl li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--rule-soft);font-size:13.5px;line-height:1.55}
+ol.cl li b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600;color:var(--steel);font-size:12px;letter-spacing:.04em;padding-top:2px}
+ol.cl li .n{color:var(--dim);font-weight:600}
+ol.cl li .x{display:block;color:var(--ink-2);font-size:12.5px;margin-top:2px}
+
+/* full text */
+details{margin-top:4px}
+summary{cursor:pointer;font-size:13px;color:var(--ink-2);letter-spacing:.08em;padding:6px 0}
+summary:focus-visible{outline:2px solid var(--dim);outline-offset:2px}
+.law{font-size:13.5px;line-height:1.85;color:var(--ink);max-width:70ch}
+.law p{margin:0 0 4px}
+.law .sub{padding-left:2em}
+.law .subsub{padding-left:4em}
+.lede{font-size:14px;color:var(--ink-2);max-width:70ch;margin:0 0 12px;line-height:1.7}
+.man{stroke:var(--ink);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.man circle{fill:var(--sheet)}
+
+@media print{body{background:#fff}.sheet{border:0;margin:0;max-width:none}details{open:true}}
+@media (prefers-reduced-motion:no-preference){summary{transition:color .15s}}
+</style>
+
+<div class="sheet">
+  <header class="tb">
+    <div>
+      <p class="eyebrow">營造安全衛生設施標準　第二章 工作場所　第 20 條</p>
+      <h1>護欄的所有規定，一張圖<small>雇主依規定設置之護欄，應依下列規定辦理（共八款）</small></h1>
+    </div>
+    <dl class="meta">
+      <dt>法規最新修正</dt><dd class="mono">民國 115.06.30</dd>
+      <dt>條文來源</dt><dd>全國法規資料庫 N0060014</dd>
+      <dt>圖面整理</dt><dd class="mono">2026-09-09</dd>
+    </dl>
+  </header>
+
+  <!-- ============ 立面圖 ============ -->
+  <section>
+    <h2>立面圖　尺寸與構材（第一、二、三、五、八款）</h2>
+    <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 1000 560" role="img" aria-label="護欄立面圖：高度九十公分以上，上下開口不大於五十五公分，腳趾板高十公分以上；左跨為標準型設腳趾板，右跨為加網型可免腳趾板，杆柱間距木材二公尺、鋼管二點五公尺、加網一點五公尺以內；上欄杆任一點任一方向承受七十五公斤不得顯著變形。" style="min-width:720px">
+      <defs>
+        <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line class="hatch-l" x1="0" y1="0" x2="0" y2="8"/>
+        </pattern>
+        <pattern id="mesh" width="12" height="12" patternUnits="userSpaceOnUse">
+          <path class="mesh-l" d="M0 6 H12 M6 0 V12" fill="none"/>
+        </pattern>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path class="ar" d="M0 0 L10 5 L0 10 z"/>
+        </marker>
+        <marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path class="ar-s" d="M0 0 L10 5 L0 10 z"/>
+        </marker>
+      </defs>
+
+      <!-- floor slab -->
+      <rect x="40" y="430" width="920" height="36" fill="url(#hatch)"/>
+      <line x1="40" y1="430" x2="960" y2="430" stroke="currentColor" stroke-width="2"/>
+      <text class="s" x="44" y="484">地盤面／樓板面</text>
+
+      <!-- mesh bay (behind members) -->
+      <rect x="607" y="172" width="286" height="258" fill="url(#mesh)"/>
+      <rect x="607" y="172" width="286" height="258" fill="none" stroke="var(--steel)" stroke-width="1" opacity=".6"/>
+
+      <!-- posts -->
+      <rect class="post" x="293" y="150" width="14" height="280"/>
+      <rect class="post" x="593" y="150" width="14" height="280"/>
+      <rect class="post" x="893" y="150" width="14" height="280"/>
+      <!-- rails -->
+      <rect class="member" x="286" y="160" width="628" height="12"/>
+      <rect class="member" x="286" y="289" width="628" height="12"/>
+      <!-- toe board, bay 1 only -->
+      <rect class="toe" x="307" y="400" width="286" height="30"/>
+
+      <!-- bay titles -->
+      <rect class="bg" x="312" y="180" width="150" height="22" rx="2"/>
+      <text class="t" x="322" y="196">Ａ　標準型・設腳趾板</text>
+      <rect class="bg" x="612" y="180" width="164" height="22" rx="2"/>
+      <text class="t" x="622" y="196">Ｂ　加網型・第八款</text>
+
+      <!-- member labels right -->
+      <line class="lead" x1="914" y1="166" x2="924" y2="166"/>
+      <text x="928" y="170">上欄杆</text>
+      <line class="lead" x1="914" y1="295" x2="924" y2="295"/>
+      <text x="928" y="299">中欄杆</text>
+      <line class="lead" x1="907" y1="372" x2="924" y2="372"/>
+      <text x="928" y="376">杆柱</text>
+
+      <!-- toe board label -->
+      <text class="s" x="318" y="392">腳趾板　高 <tspan class="n" style="font-size:12px">≥10 cm</tspan>・厚 <tspan class="n" style="font-size:12px">≥1 cm</tspan>・密接樓板</text>
+      <line class="dim" x1="578" y1="400" x2="578" y2="430" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="n" x="571" y="419" text-anchor="end" style="font-size:12px">≥10</text>
+
+      <!-- height dimension -->
+      <line class="ext" x1="110" y1="160" x2="286" y2="160"/>
+      <line class="dim" x1="120" y1="160" x2="120" y2="430" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="n" x="110" y="292" text-anchor="end" style="font-size:16px">≥ 90 cm</text>
+      <text class="s" x="110" y="310" text-anchor="end">護欄高度</text>
+
+      <!-- opening dimensions -->
+      <line class="ext" x1="240" y1="172" x2="286" y2="172"/>
+      <line class="ext" x1="240" y1="289" x2="286" y2="289"/>
+      <line class="ext" x1="240" y1="301" x2="286" y2="301"/>
+      <line class="ext" x1="240" y1="400" x2="307" y2="400"/>
+      <line class="dim" x1="250" y1="172" x2="250" y2="289" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <line class="dim" x1="250" y1="301" x2="250" y2="400" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="n" x="240" y="228" text-anchor="end" style="font-size:14px">≤ 55 cm</text>
+      <text class="s" x="240" y="244" text-anchor="end">上下開口</text>
+      <text class="n" x="240" y="348" text-anchor="end" style="font-size:14px">≤ 55 cm</text>
+      <text class="s" x="240" y="364" text-anchor="end">上下開口</text>
+
+      <!-- 75 kg load on top rail -->
+      <circle cx="480" cy="160" r="5" fill="var(--steel)"/>
+      <line class="ld" x1="480" y1="108" x2="480" y2="151" marker-end="url(#ars)"/>
+      <line class="ld" x1="440" y1="122" x2="472" y2="153" marker-end="url(#ars)"/>
+      <line class="ld" x1="520" y1="122" x2="488" y2="153" marker-end="url(#ars)"/>
+      <line class="ld" x1="425" y1="160" x2="470" y2="160" marker-end="url(#ars)"/>
+      <line class="ld" x1="535" y1="160" x2="490" y2="160" marker-end="url(#ars)"/>
+      <text class="n" x="480" y="84" text-anchor="middle" style="font-size:16px;fill:var(--steel)">75 kg</text>
+      <text class="k" x="480" y="100" text-anchor="middle">上欄杆任一點・任一方向施力，不得顯著變形（第五款）</text>
+
+      <!-- mesh notes -->
+      <rect class="bg" x="628" y="318" width="244" height="84" rx="2"/>
+      <text class="t" x="640" y="336">金屬網／塑膠網 遮覆空隙</text>
+      <text class="s" x="640" y="354">網目 <tspan class="n" style="font-size:12px">≤ 15 cm²</tspan>・密接樓板，得不設腳趾板</text>
+      <text class="s" x="640" y="372">網固定於上欄杆、中欄杆及杆柱</text>
+      <text class="s" x="640" y="390">固定時應有防止反彈設施</text>
+
+      <!-- post spacing dims -->
+      <line class="ext" x1="300" y1="430" x2="300" y2="512"/>
+      <line class="ext" x1="600" y1="430" x2="600" y2="512"/>
+      <line class="ext" x1="900" y1="430" x2="900" y2="512"/>
+      <line class="dim" x1="300" y1="506" x2="600" y2="506" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <line class="dim" x1="600" y1="506" x2="900" y2="506" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text class="s" x="450" y="530" text-anchor="middle">杆柱間距　木材 <tspan class="n" style="font-size:13px">≤ 2 m</tspan>　鋼管 <tspan class="n" style="font-size:13px">≤ 2.5 m</tspan></text>
+      <text class="s" x="750" y="530" text-anchor="middle">加網時 <tspan class="n" style="font-size:13px">≤ 1.5 m</tspan></text>
+    </svg>
+    </div>
+    <figcaption>三個數字最常被檢查：高度 90 公分以上、任一上下開口不超過 55 公分、腳趾板 10 公分以上。第八款用網遮覆時腳趾板可免，但網要密接樓板，杆柱間距縮到 1.5 公尺。圖為示意，未按比例。</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ 側視 + 材料表 ============ -->
+  <section>
+    <div class="two">
+      <div>
+        <h2>側視圖　護欄前方淨空（第六、七款）</h2>
+        <figure>
+        <svg viewBox="0 0 640 300" role="img" aria-label="護欄側視圖：護欄前方二公尺內不得堆放物料設備、不得使用梯子合梯踏凳作業、不得停放車輛機械；但護欄頂端高出堆放物最高點九十公分以上，或已有防墜設施者不在此限。護欄應圍繞所有危險開口。">
+          <defs>
+            <pattern id="hatch2" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line class="hatch-l" x1="0" y1="0" x2="0" y2="8"/>
+            </pattern>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path class="ar" d="M0 0 L10 5 L0 10 z"/>
+            </marker>
+          </defs>
+          <!-- slab ends at opening -->
+          <rect x="20" y="230" width="450" height="18" fill="url(#hatch2)"/>
+          <line x1="20" y1="230" x2="470" y2="230" stroke="currentColor" stroke-width="2"/>
+          <line x1="470" y1="230" x2="470" y2="248" stroke="currentColor" stroke-width="2"/>
+          <text class="s" x="480" y="244">危險開口部分</text>
+          <text class="s" x="480" y="260">除必要進出口外，護欄應圍繞</text>
+
+          <!-- zone -->
+          <rect class="zone" x="40" y="70" width="360" height="160"/>
+          <text x="200" y="98" text-anchor="middle" style="font-weight:700;fill:var(--dim)">護欄前方 2 m 內</text>
+          <text class="s" x="200" y="118" text-anchor="middle">不得堆放任何物料、設備</text>
+          <text class="s" x="200" y="136" text-anchor="middle">不得使用梯子、合梯、踏凳作業</text>
+          <text class="s" x="200" y="154" text-anchor="middle">不得停放車輛機械供勞工使用</text>
+
+          <!-- exception pile -->
+          <rect class="ghost" x="300" y="212" width="80" height="18"/>
+          <line class="ext" x1="330" y1="50" x2="400" y2="50"/>
+          <line class="dim" x1="340" y1="50" x2="340" y2="212" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+          <text class="n" x="332" y="190" text-anchor="end" style="font-size:12px">≥ 90 cm</text>
+          <text class="s" x="200" y="205" text-anchor="middle">但書：堆放物最高點與護欄頂距 ≥ 90 cm，或另有防墜設施者，不在此限</text>
+
+          <!-- rail section -->
+          <rect class="post" x="400" y="50" width="8" height="180"/>
+          <circle class="member" cx="404" cy="57" r="7"/>
+          <circle class="member" cx="404" cy="140" r="6"/>
+          <rect class="toe" x="393" y="212" width="7" height="18"/>
+          <text class="s" x="420" y="61">上欄杆</text>
+          <text class="s" x="420" y="144">中欄杆</text>
+          <text class="s" x="420" y="226">腳趾板</text>
+          <text class="k" x="420" y="40">護欄（側視）</text>
+
+          <!-- 2 m dim -->
+          <line class="ext" x1="40" y1="230" x2="40" y2="282"/>
+          <line class="ext" x1="400" y1="230" x2="400" y2="282"/>
+          <line class="dim" x1="40" y1="276" x2="400" y2="276" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+          <text class="n" x="220" y="270" text-anchor="middle" style="font-size:14px">2 m</text>
+        </svg>
+        <figcaption>第七款管的是護欄「前面」那兩公尺：地上不能堆東西、不能架梯子、不能停機具，避免有人踩上去就翻過護欄。護欄頂比堆放物高出 90 公分以上，等於重新拿回一個護欄的高度，所以放行。</figcaption>
+        </figure>
+      </div>
+
+      <div>
+        <h2>材料規格表（第二、三、四款）</h2>
+        <div class="scroll">
+        <table>
+          <thead>
+            <tr><th>構材</th><th>木材（第二款）</th><th>鋼管（第三款）</th><th>其他材料／型式（第四款）</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>上欄杆</th><td>應平整，斷面 <span class="n mono">≥ 30 cm²</span></td><td>直徑 <span class="n mono">≥ 3.8 cm</span></td><td rowspan="4">應具與木材、鋼管<br>同等以上之強度</td></tr>
+            <tr><th>中欄杆</th><td>斷面 <span class="n mono">≥ 25 cm²</span></td><td>直徑 <span class="n mono">≥ 3.8 cm</span></td></tr>
+            <tr><th>杆柱</th><td>斷面 <span class="n mono">≥ 30 cm²</span></td><td>直徑 <span class="n mono">≥ 3.8 cm</span></td></tr>
+            <tr><th>杆柱間距</th><td><span class="n mono">≤ 2 m</span></td><td><span class="n mono">≤ 2.5 m</span></td></tr>
+            <tr><th>腳趾板</th><td>高 <span class="n mono">≥ 10 cm</span>、厚 <span class="n mono">≥ 1 cm</span><br>密接於地盤面或樓板面舖設</td><td class="same" colspan="2">條文未另訂尺寸，依第一款須設置</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="foot">不論哪種材料，第五款的 75 公斤荷重試驗都適用；第八款加網時，杆柱間距一律縮為 1.5 公尺以內。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 容易搞混：護欄 90 vs 通道扶手 75 ============ -->
+  <section>
+    <h2>容易搞混　護欄 90 公分 ≠ 通道扶手 75 公分</h2>
+    <p class="lede">兩個數字來自兩部不同的法規，管的是不同的東西。營造安全衛生設施標準第 20 條的護欄，圍的是開口和開放邊線，要 90 公分以上，還要中欄杆、腳趾板。職業安全衛生設施規則第 36 條第四款的扶手，裝在通道和機械防護跨橋旁邊，只要 75 公分以上的堅固扶手。同一個工地兩種都可能出現，先問「這是圍開口的護欄，還是通道旁的扶手」，再決定量哪個數字。</p>
+    <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 1000 430" role="img" aria-label="同比例並排比較：左為營造安全衛生設施標準第二十條護欄，高度九十公分以上，含上欄杆、中欄杆、腳趾板、杆柱；右為職業安全衛生設施規則第三十六條第四款通道扶手，高度七十五公分以上之堅固扶手；兩者相差十五公分。" style="min-width:720px">
+      <defs>
+        <pattern id="hatch3" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="hatch-l" x1="0" y1="0" x2="0" y2="8"/></pattern>
+        <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ar" d="M0 0 L10 5 L0 10 z"/></marker>
+      </defs>
+
+      <!-- common floor, same scale: 3 px = 1 cm -->
+      <rect x="40" y="340" width="920" height="24" fill="url(#hatch3)"/>
+      <line x1="40" y1="340" x2="960" y2="340" stroke="currentColor" stroke-width="2"/>
+      <text class="s" x="500" y="384" text-anchor="middle">同一比例繪製（3 px = 1 cm）　左右兩座從同一個地面量起</text>
+
+      <!-- ===== LEFT: 護欄 §20 ===== -->
+      <text class="t" x="260" y="34" text-anchor="middle" style="font-size:14px">營造安全衛生設施標準　第 20 條　護欄</text>
+      <text class="s" x="260" y="52" text-anchor="middle">圍繞危險之開口部分、開放邊線</text>
+      <!-- posts -->
+      <rect class="post" x="130" y="62" width="12" height="278"/>
+      <rect class="post" x="380" y="62" width="12" height="278"/>
+      <!-- top rail top at y=70 (90 cm), mid rail, toe board -->
+      <rect class="member" x="124" y="70" width="274" height="12"/>
+      <rect class="member" x="124" y="199" width="274" height="12"/>
+      <rect class="toe" x="142" y="310" width="238" height="30"/>
+      <text class="s" x="404" y="80">上欄杆</text>
+      <text class="s" x="404" y="209">中欄杆</text>
+      <text class="s" x="404" y="330">腳趾板</text>
+      <!-- dim -->
+      <line class="ext" x1="70" y1="70" x2="124" y2="70"/>
+      <line class="dim" x1="80" y1="70" x2="80" y2="340" marker-start="url(#ar3)" marker-end="url(#ar3)"/>
+      <text class="n" x="72" y="196" text-anchor="end" style="font-size:18px">≥ 90</text>
+      <text class="n" x="72" y="214" text-anchor="end" style="font-size:13px">cm</text>
+      <!-- requirements -->
+      <text class="s" x="150" y="245">上欄杆＋中欄杆＋腳趾板＋杆柱</text>
+      <text class="s" x="150" y="263">上下開口 ≤ 55 cm</text>
+      <text class="s" x="150" y="281">上欄杆任一點承受 75 kg</text>
+
+      <!-- ===== divider ===== -->
+      <line x1="500" y1="60" x2="500" y2="330" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 4"/>
+      <circle cx="500" cy="195" r="16" fill="var(--sheet)" stroke="var(--rule)"/>
+      <text x="500" y="200" text-anchor="middle" style="font-size:13px;font-weight:700;fill:var(--ink-2)">≠</text>
+
+      <!-- ===== RIGHT: 通道扶手 §36 ===== -->
+      <text class="t" x="740" y="34" text-anchor="middle" style="font-size:14px">職業安全衛生設施規則　第 36 條第四款　通道扶手</text>
+      <text class="s" x="740" y="52" text-anchor="middle">架設之通道及機械防護跨橋，有墜落之虞之場所</text>
+      <!-- walkway plank -->
+      <rect class="member" x="560" y="330" width="280" height="10" opacity=".55"/>
+      <!-- posts -->
+      <rect class="post" x="600" y="107" width="12" height="233"/>
+      <rect class="post" x="800" y="107" width="12" height="233"/>
+      <!-- handrail top at y=115 (75 cm) -->
+      <rect class="member" x="594" y="115" width="224" height="12"/>
+      <text class="s" x="826" y="125">堅固扶手</text>
+      <!-- walking person -->
+      <g class="man"><circle cx="706" cy="216" r="9"/><path d="M706 225 V270 M706 238 L690 254 M706 238 L722 250 M706 270 L692 330 M706 270 L722 330"/></g>
+      <!-- dim -->
+      <line class="ext" x1="818" y1="115" x2="900" y2="115"/>
+      <line class="dim" x1="880" y1="115" x2="880" y2="340" marker-start="url(#ar3)" marker-end="url(#ar3)"/>
+      <text class="n" x="892" y="226" style="font-size:18px">≥ 75</text>
+      <text class="n" x="892" y="244" style="font-size:13px">cm</text>
+      <!-- requirements -->
+      <text class="s" x="560" y="160">條文只要求「堅固扶手」</text>
+      <text class="s" x="560" y="178">未規定中欄杆、腳趾板</text>
+      <text class="s" x="560" y="196">作業上認有必要時，得設活動扶手</text>
+
+      <!-- 15 cm difference: extend guardrail top across -->
+      <line class="ext" x1="398" y1="70" x2="960" y2="70"/>
+      <line class="dim" x1="940" y1="70" x2="940" y2="115" marker-start="url(#ar3)" marker-end="url(#ar3)"/>
+      <text class="n" x="950" y="96" style="font-size:12px">差 15 cm</text>
+    </svg>
+    </div>
+    <figcaption>把兩座畫在同一個地面上，差距就看得出來：護欄比通道扶手高出 15 公分，而且多了中欄杆和腳趾板。用 75 公分的扶手去圍樓板開口，是不合第 20 條的。</figcaption>
+    </figure>
+
+    <div class="scroll" style="margin-top:18px">
+    <table>
+      <thead>
+        <tr><th></th><th>護欄</th><th>通道扶手</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>法源</th><td>營造安全衛生設施標準 第 20 條</td><td>職業安全衛生設施規則 第 36 條第四款</td></tr>
+        <tr><th>裝在哪裡</th><td>危險之開口部分、開放邊線（除必須之進出口外全部圍繞）</td><td>雇主架設之通道及機械防護跨橋，有墜落之虞之場所</td></tr>
+        <tr><th>高度</th><td><span class="n mono">≥ 90 cm</span></td><td><span class="n mono">≥ 75 cm</span></td></tr>
+        <tr><th>構材</th><td>上欄杆、中欄杆（或等效設備）、腳趾板、杆柱；上下開口 <span class="n mono">≤ 55 cm</span></td><td>堅固扶手；必要時得在必要範圍內設活動扶手</td></tr>
+        <tr><th>強度</th><td>上欄杆任一點、任一方向 <span class="n mono">75 kg</span> 無顯著變形</td><td>條文僅稱「堅固」，未給數值</td></tr>
+        <tr><th>同條其他規定</th><td>前方 2 m 淨空、加網規格等（見上）</td><td>傾斜 ≤ 30°；超過 15° 設踏條或防滑；漏空格條縫隙 <span class="n mono">≤ 3 cm</span>；豎坑通道與高階梯設平台</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <details>
+      <summary>展開職業安全衛生設施規則第 36 條全文（全國法規資料庫）</summary>
+      <div class="law">
+        <p>雇主架設之通道及機械防護跨橋，應依下列規定：</p>
+        <p class="sub">一、具有堅固之構造。</p>
+        <p class="sub">二、傾斜應保持在三十度以下。但設置樓梯者或其高度未滿二公尺而設置有扶手者，不在此限。</p>
+        <p class="sub">三、傾斜超過十五度以上者，應設置踏條或採取防止溜滑之措施。</p>
+        <p class="sub">四、有墜落之虞之場所，應置備高度七十五公分以上之堅固扶手。在作業上認有必要時，得在必要之範圍內設置活動扶手。</p>
+        <p class="sub">五、設置於豎坑內之通道，長度超過十五公尺者，每隔十公尺內應設置平台一處。</p>
+        <p class="sub">六、營建使用之高度超過八公尺以上之階梯，應於每隔七公尺內設置平台一處。</p>
+        <p class="sub">七、通道路用漏空格條製成者，其縫間隙不得超過三公分，超過時，應裝置鐵絲網防護。</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============ 八款摘要 ============ -->
+  <section>
+    <h2>八款速查</h2>
+    <ol class="cl">
+      <li><b>第一款</b><span>構材：上欄杆、中欄杆（或等效設備）、腳趾板、杆柱。高度 <span class="n mono">≥ 90 cm</span>；上欄杆、中欄杆、地盤面／樓板面之間的上下開口 <span class="n mono">≤ 55 cm</span>。</span></li>
+      <li><b>第二款</b><span>木材：上欄杆平整、斷面 <span class="n mono">≥ 30 cm²</span>；中欄杆 <span class="n mono">≥ 25 cm²</span>；腳趾板高 <span class="n mono">≥ 10 cm</span>、厚 <span class="n mono">≥ 1 cm</span> 且密接地面；杆柱 <span class="n mono">≥ 30 cm²</span>、間距 <span class="n mono">≤ 2 m</span>。</span></li>
+      <li><b>第三款</b><span>鋼管：上欄杆、中欄杆、杆柱直徑均 <span class="n mono">≥ 3.8 cm</span>；杆柱間距 <span class="n mono">≤ 2.5 m</span>。</span></li>
+      <li><b>第四款</b><span>其他材料或型式：強度須與前兩款同等以上。</span></li>
+      <li><b>第五款</b><span>強度與錨錠：上欄杆任一點、任一方向加 <span class="n mono">75 kg</span> 荷重，整個護欄無顯著變形。</span></li>
+      <li><b>第六款</b><span>範圍：除必須之進出口外，護欄應圍繞所有危險之開口部分。</span></li>
+      <li><b>第七款</b><span>前方 <span class="n mono">2 m</span> 內：不得堆放物料、設備；不得使用梯子、合梯、踏凳作業；不得停放車輛機械供勞工使用。<span class="x">但護欄高出這些東西最高點 <span class="n mono">≥ 90 cm</span>，或已有適當防墜設施者，不在此限。</span></span></li>
+      <li><b>第八款</b><span>以金屬網、塑膠網遮覆空隙：得不設腳趾板，但網須密接樓板、杆柱間距 <span class="n mono">≤ 1.5 m</span>；網固定於上欄杆、中欄杆及杆柱；網目 <span class="n mono">≤ 15 cm²</span>；固定時應有防反彈設施。</span></li>
+    </ol>
+  </section>
+
+  <!-- ============ 條文原文 ============ -->
+  <section>
+    <h2>條文原文</h2>
+    <details>
+      <summary>展開第 20 條全文（全國法規資料庫，115.06.30 版）</summary>
+      <div class="law">
+        <p>雇主依規定設置之護欄，應依下列規定辦理：</p>
+        <p>一、具有高度九十公分以上之上欄杆、中間欄杆或等效設備（以下簡稱中欄杆）、腳趾板及杆柱等構材；其上欄杆、中欄杆及地盤面與樓板面間之上下開口距離，應不大於五十五公分。</p>
+        <p>二、以木材構成者，其規格如下：</p>
+        <p class="sub">（一）上欄杆應平整，且其斷面應在三十平方公分以上。</p>
+        <p class="sub">（二）中欄杆斷面應在二十五平方公分以上。</p>
+        <p class="sub">（三）腳趾板高度應在十公分以上，厚度在一公分以上，並密接於地盤面或樓板面舖設。</p>
+        <p class="sub">（四）杆柱斷面應在三十平方公分以上，相鄰間距不得超過二公尺。</p>
+        <p>三、以鋼管構成者，其上欄杆、中欄杆及杆柱之直徑均不得小於三點八公分，杆柱相鄰間距不得超過二點五公尺。</p>
+        <p>四、採用前二款以外之其他材料或型式構築者，應具同等以上之強度。</p>
+        <p>五、任何型式之護欄，其杆柱、杆件之強度及錨錠，應使整個護欄具有抵抗於上欄杆之任何一點，於任何方向加以七十五公斤之荷重，而無顯著變形之強度。</p>
+        <p>六、除必須之進出口外，護欄應圍繞所有危險之開口部分。</p>
+        <p>七、護欄前方二公尺內之樓板、地板，不得堆放任何物料、設備，並不得使用梯子、合梯、踏凳作業及停放車輛機械供勞工使用。但護欄高度超過堆放之物料、設備、梯、凳及車輛機械之最高部達九十公分以上，或已採取適當安全設施足以防止墜落者，不在此限。</p>
+        <p>八、以金屬網、塑膠網遮覆上欄杆、中欄杆與樓板或地板間之空隙者，依下列規定辦理：</p>
+        <p class="sub">（一）得不設腳趾板。但網應密接於樓板或地板，且杆柱之間距不得超過一點五公尺。</p>
+        <p class="sub">（二）網應確實固定於上欄杆、中欄杆及杆柱。</p>
+        <p class="sub">（三）網目大小不得超過十五平方公分。</p>
+        <p class="sub">（四）固定網時，應有防止網之反彈設施。</p>
+      </div>
+    </details>
+  </section>
+</div>

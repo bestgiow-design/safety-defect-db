@@ -752,6 +752,12 @@ function stYM(r){ return r.ym||ymOf(r.date); }
 const ST_LAW_ABBR={'職業安全衛生設施規則':'設施規則','營造安全衛生設施標準':'營標','職業安全衛生法':'職安法','職業安全衛生管理辦法':'職安管理辦法',
   '營建工程空氣污染防制設施管理辦法':'空污辦法','危險性機械及設備安全檢查規則':'危機規則','危害性化學品標示及通識規則':'通識規則','道路交通安全規則':'道安規則'};
 
+// 法條圖解（一條一張，2026-09-09 依法規原文畫的，原檔在 vault 04_工作/參考資料/營標圖解/）
+// 檔案放 public/illust/<pcode>-<條號>.html；新增圖解時在這裡登記
+const ILLUST={'營造安全衛生設施標準':{'20':'護欄','21':'護蓋','22':'安全網','23':'安全帶母索','24':'警示線','26':'高處物件固定','27':'覆網','28':'投擲運送'}};
+const ILLUST_PCODE={'營造安全衛生設施標準':'N0060014'};
+function illustUrl(name,no){ const t=ILLUST[name]&&ILLUST[name][String(no||'')]; return t?`illust/${ILLUST_PCODE[name]}-${no}.html`:''; }
+
 let stState={from:'',to:'',proj:''};
 let stCharts=[]; // 目前畫面上的圖：{key,title,draw(theme)}
 
@@ -845,11 +851,15 @@ function renderStats(){
   const lawData=Object.entries(byLaw).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,n])=>{ const [name,no]=k.split('|'); return {label:`${ST_LAW_ABBR[name]||name} ${no}`,value:n,tip:`${name}第${no}條：${n} 筆`}; });
 
   stCharts=[];
-  const add=(key,title,data,kind,note)=>{ if(data.length) stCharts.push({key,title,note,draw:th=>(kind==='v'?stVBar:stHBar)(data,th)}); };
+  const add=(key,title,data,kind,note,extra)=>{ if(data.length) stCharts.push({key,title,note,extra,draw:th=>(kind==='v'?stVBar:stHBar)(data,th)}); };
+  // 排行裡有圖解的法條，列在圖下方可直接點開
+  const lawIllust=Object.entries(byLaw).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k])=>k.split('|')).filter(([name,no])=>illustUrl(name,no));
+  const lawExtra=lawIllust.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:12px;color:var(--text3)">📐 有圖解：`
+    +lawIllust.map(([name,no])=>`<a href="${illustUrl(name,no)}" target="_blank" style="padding:3px 10px;border:1px solid var(--border);border-radius:12px;color:var(--text2);text-decoration:none">${stEsc((ST_LAW_ABBR[name]||name)+' '+no+'　'+ILLUST[name][no])}</a>`).join('')+'</div>':'';
   if(!proj) add('各案缺失件數','各案缺失件數',projData,'h','滑過長條可看督導場次與平均每場件數');
   add('缺失類別分布','缺失類別分布',catData,'h');
   add('逐月缺失件數','逐月缺失件數',monthData,'v','月份依歸屬月份計，補督批次算進前一個月');
-  add('最常違反的法條','最常違反的法條（前 10 名）',lawData,'h','一筆缺失引用多條法規時，每條各算一次');
+  add('最常違反的法條','最常違反的法條（前 10 名）',lawData,'h','一筆缺失引用多條法規時，每條各算一次',lawExtra);
 
   const th=stTheme();
   const tile=(n,l,c)=>`<div class="stat"><div class="stat-n"${c?` style="color:${c}"`:''}>${n}</div><div class="stat-l">${l}</div></div>`;
@@ -864,7 +874,7 @@ function renderStats(){
         <button onclick="stDownload(${i})" style="padding:6px 12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:12px;white-space:nowrap">⬇ 下載圖片</button>
       </div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:10px">${stEsc(scope)}${c.note?'｜'+stEsc(c.note):''}</div>
-      <div class="st-plot" style="position:relative">${stSvg(c.draw(th),th)}</div>
+      <div class="st-plot" style="position:relative">${stSvg(c.draw(th),th)}</div>${c.extra||''}
     </div>`;
   });
   const body=document.getElementById('statsBody');
@@ -1280,7 +1290,7 @@ window.openDetail=function(id){
   else document.getElementById('d_projWrap').style.display='none';
   const laws=r.laws&&r.laws.length>0?r.laws:(r.law?[{name:r.law,no:'',link:r.lawLink||''}]:[]);
   const dispLaws=laws.length>0?laws:(r.law?[{name:r.law,no:'',link:''}]:[]);
-  document.getElementById('d_law').innerHTML=dispLaws.length>0?dispLaws.map(l=>{const t=l.no?l.name+'第'+l.no+'條':l.name;return l.link?`<a href="${l.link}" target="_blank" style="color:var(--blue);display:block;margin-bottom:4px">${t} 📋</a>`:`<span style="display:block;margin-bottom:4px;font-size:14px">${t}</span>`;}).join(''):'—';
+  document.getElementById('d_law').innerHTML=dispLaws.length>0?dispLaws.map(l=>{const t=l.no?l.name+'第'+l.no+'條':l.name;const il=illustUrl(l.name,l.no);const ilA=il?` <a href="${il}" target="_blank" style="display:inline-block;margin-left:6px;padding:1px 8px;border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--text2);text-decoration:none">📐 圖解</a>`:'';return l.link?`<span style="display:block;margin-bottom:4px"><a href="${l.link}" target="_blank" style="color:var(--blue)">${t} 📋</a>${ilA}</span>`:`<span style="display:block;margin-bottom:4px;font-size:14px">${t}${ilA}</span>`;}).join(''):'—';
   const allPhotos=photoList(r);
   document.getElementById('d_imgWrap').innerHTML=allPhotos.length>0?allPhotos.map(p=>`<img class="detail-img" src="${p}" loading="lazy" style="width:100%;border-radius:10px;margin-bottom:8px">`).join(''):`<div class="detail-img-ph"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span>尚無照片</span></div>`;
   if(r.lawtext){document.getElementById('d_lawtext').textContent=r.lawtext;document.getElementById('d_lawtextWrap').style.display='block';}else document.getElementById('d_lawtextWrap').style.display='none';
